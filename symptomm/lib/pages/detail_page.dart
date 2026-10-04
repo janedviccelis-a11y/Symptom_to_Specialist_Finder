@@ -13,7 +13,8 @@ class DetailPage extends StatelessWidget {
         padding: const EdgeInsets.only(top: 18, bottom: 6),
         child: Text(
           title,
-          style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: ink),
+          style: const TextStyle(
+              fontSize: 21, fontWeight: FontWeight.w800, color: ink),
         ),
       );
 
@@ -32,22 +33,47 @@ class DetailPage extends StatelessWidget {
     final localClinics = searchClinics(specialty.name);
 
     return Shell(
-      title: '${specialty.name} - Specialty Details',
+      title: specialty.name,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Container(
-            height: 150,
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               gradient: const LinearGradient(colors: [blue, teal]),
             ),
-            child: Center(
-              child: CircleAvatar(
-                radius: 52,
-                backgroundColor: Colors.white,
-                child: Icon(specialty.icon, size: 56, color: const Color(0xFFD33B3B)),
-              ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 34,
+                  backgroundColor: Colors.white,
+                  child: Icon(specialty.icon, size: 34, color: blue),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        specialty.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        specialty.brief,
+                        style:
+                            const TextStyle(color: Colors.white, height: 1.3),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           heading('What is a $firstWord specialist?'),
@@ -66,7 +92,8 @@ class DetailPage extends StatelessWidget {
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onSubmitted: (value) {
               final query = value.trim();
@@ -87,34 +114,34 @@ class DetailPage extends StatelessWidget {
             },
           ),
           const SizedBox(height: 12),
-          if (localClinics.isNotEmpty)
-            ...[
-              const Text(
-                'Nearby clinics',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              for (final clinic in localClinics.take(3))
-                Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(10),
-                  decoration: card(),
-                  child: ListTile(
-                    title: Text(clinic.name, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text('${clinic.city} • ${clinic.address}'),
-                    trailing: const Icon(Icons.location_on_outlined, color: blue),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ClinicMapPage(
-                          clinics: [clinic],
-                          title: clinic.name,
-                        ),
+          if (localClinics.isNotEmpty) ...[
+            const Text(
+              'Nearby clinics',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            for (final clinic in localClinics.take(3))
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(10),
+                decoration: card(),
+                child: ListTile(
+                  title: Text(clinic.name,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  subtitle: Text('${clinic.city} • ${clinic.address}'),
+                  trailing: const Icon(Icons.location_on_outlined, color: blue),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ClinicMapPage(
+                        clinics: [clinic],
+                        title: clinic.name,
                       ),
                     ),
                   ),
                 ),
-            ],
+              ),
+          ],
           const SizedBox(height: 16),
           const Text(disclaimer, style: TextStyle(fontSize: 12.5)),
         ],
