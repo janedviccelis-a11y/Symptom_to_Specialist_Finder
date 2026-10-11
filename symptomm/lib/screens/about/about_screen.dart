@@ -7,7 +7,7 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Shell(
-        title: 'About this App',
+        title: 'About Mediora',
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -15,7 +15,7 @@ class AboutScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: card(),
               child: const Text(
-                'Symptom to Specialist Finder helps you decide which kind of medical specialist to consult. '
+                'Mediora helps you decide which kind of medical specialist to consult. '
                 'It matches the symptoms you choose against a curated rule table and ranks specialties by a weighted score.\n\n'
                 '$disclaimer It is not a replacement for professional consultation.\n\n'
                 'Project proposal by Celis, Jan Edvic D. and Joson, Ralph Xaviery P. (BSCPE-4).',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:symptomm/models/symptom_data.dart';
 import 'package:symptomm/pages/results_page.dart';
 import 'package:symptomm/widgets/common.dart';
+import 'package:symptomm/widgets/interactive_body_map.dart';
 
 class SymptomPage extends StatefulWidget {
   const SymptomPage({super.key});
@@ -14,22 +15,6 @@ class _SymptomPageState extends State<SymptomPage> {
   final selected = <String>{};
   final controller = TextEditingController();
   String area = cats.keys.first;
-
-  static const categoryIcons = <String, IconData>{
-    'Head & Neck': Icons.face_3_outlined,
-    'Chest & Breathing': Icons.monitor_heart_outlined,
-    'Abdomen & Digestion': Icons.medication_liquid_outlined,
-    'Muscles & Joints': Icons.accessibility_new,
-    'Skin & Hair': Icons.spa_outlined,
-  };
-
-  static const categoryColors = <String, Color>{
-    'Head & Neck': Color(0xFF5579B8),
-    'Chest & Breathing': Color(0xFFC45D51),
-    'Abdomen & Digestion': Color(0xFFB17B35),
-    'Muscles & Joints': Color(0xFF4D8B70),
-    'Skin & Hair': Color(0xFF9A668E),
-  };
 
   @override
   void dispose() {
@@ -45,100 +30,36 @@ class _SymptomPageState extends State<SymptomPage> {
         }
       });
 
-    Widget tile(Symptom symptom) => Material(
-      color: Colors.transparent,
-      child: CheckboxListTile(
+  Widget symptomTile(Symptom symptom) => CheckboxListTile(
         dense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
         controlAffinity: ListTileControlAffinity.trailing,
+        activeColor: teal,
         secondary: CircleAvatar(
           radius: 18,
           backgroundColor:
-              symptom.red ? const Color(0xFFFFE8E5) : const Color(0xFFE4F2F0),
+              symptom.red ? const Color(0xFFFFE8E5) : const Color(0xFFEAF4F2),
           child: Icon(
             symptom.red
                 ? Icons.priority_high_rounded
                 : (cats[symptom.cat] ?? Icons.healing),
-            size: 19,
+            size: 18,
             color: symptom.red ? const Color(0xFFB6382F) : teal,
           ),
         ),
-        title: Text(symptom.name,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-        subtitle: symptom.red ? const Text('Urgent symptom') : null,
+        title: Text(
+          symptom.name,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+        subtitle: symptom.red
+            ? const Text(
+                'Urgent symptom',
+                style: TextStyle(color: Color(0xFFB6382F), fontSize: 12),
+              )
+            : null,
         value: selected.contains(symptom.name),
-          onChanged: (value) => toggleSymptom(symptom, value),
-        ),
+        onChanged: (value) => toggleSymptom(symptom, value),
       );
-
-  Widget categoryIllustration(String key,
-          {double size = 30, double boxSize = 58}) =>
-      Container(
-        width: boxSize,
-        height: boxSize,
-        decoration: BoxDecoration(
-          color: categoryColors[key]!.withValues(alpha: .11),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        alignment: Alignment.center,
-        child: Icon(categoryIcons[key], size: size, color: categoryColors[key]),
-      );
-
-  int selectedCount(String key) =>
-      symptoms.where((s) => s.cat == key && selected.contains(s.name)).length;
-
-  Widget areaChoice(String key) {
-    final isSelected = area == key;
-    final count = selectedCount(key);
-    return SizedBox(
-      width: 154,
-      child: Semantics(
-        button: true,
-        selected: isSelected,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => setState(() => area = key),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 190),
-            curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: .58),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color:
-                    isSelected ? categoryColors[key]! : const Color(0xFFD7E4E6),
-                width: isSelected ? 1.5 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                categoryIllustration(key, size: 22, boxSize: 42),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(key,
-                          maxLines: 3,
-                          style: const TextStyle(
-                              fontSize: 12.5, fontWeight: FontWeight.w700)),
-                      if (count > 0)
-                        Text('$count selected',
-                            style: TextStyle(
-                                fontSize: 11, color: categoryColors[key])),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,14 +74,15 @@ class _SymptomPageState extends State<SymptomPage> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: TextField(
               controller: controller,
               onChanged: (_) => setState(() {}),
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
                 hintText: 'Search symptoms',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: const TextStyle(color: Color(0xFF788A91)),
+                prefixIcon: const Icon(Icons.search_rounded, color: blue),
                 suffixIcon: controller.text.isEmpty
                     ? null
                     : IconButton(
@@ -169,82 +91,202 @@ class _SymptomPageState extends State<SymptomPage> {
                           controller.clear();
                           setState(() {});
                         },
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(Icons.close_rounded),
                       ),
                 filled: true,
                 fillColor: Colors.white,
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFFE0E9EA)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: blue, width: 1.5),
+                ),
               ),
             ),
           ),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              reverseDuration: const Duration(milliseconds: 160),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, .025),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-              ),
-              child: ListView(
-                key: ValueKey('$area:${controller.text.isNotEmpty}'),
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      'Choose a body area',
-                      style: TextStyle(
-                          fontSize: 19,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 13),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE2F0ED),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.health_and_safety_rounded,
+                          color: Color(0xFF347E77),
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      const Text(
+                        'MEDIORA  /  SYMPTOM CHECK',
+                        style: TextStyle(
+                          fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: ink),
+                          letterSpacing: 1.1,
+                          color: Color(0xFF71838A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Text(
+                  'Where does it hurt?',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: ink,
+                    letterSpacing: -.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Tap a part of the body to explore related symptoms.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: Color(0xFF60747D),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                InteractiveBodyMap(
+                  selectedArea: area,
+                  onAreaSelected: (value) => setState(() => area = value),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: const Color(0xFFE4ECEC)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF4A9B8F),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          area,
+                          style: const TextStyle(
+                            color: ink,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${areaResults.length} symptoms',
+                        style: const TextStyle(
+                          color: Color(0xFF71838A),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Related symptoms',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: ink,
+                        ),
+                      ),
                     ),
+                    Text(
+                      '${areaResults.length} available',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF71838A),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 9),
+                Material(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    side: const BorderSide(color: Color(0xFFE0E9EA)),
                   ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [for (final key in cats.keys) areaChoice(key)],
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    area,
-                    style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.w800, color: ink),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    decoration: card(),
-                    child: areaResults.isEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text(
-                              'No matching symptoms in this body area. Try another search or choose a different area.',
+                  clipBehavior: Clip.antiAlias,
+                  child: areaResults.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Text(
+                            query.isEmpty
+                                ? 'No symptoms are available for this area.'
+                                : 'No matching symptoms here. Try another search or choose a different area.',
+                            style: const TextStyle(
+                              color: Color(0xFF60747D),
+                              height: 1.4,
                             ),
-                          )
-                        : Column(children: [for (final symptom in areaResults) tile(symptom)]),
-                  ),
-                ],
-              ),
+                          ),
+                        )
+                      : Column(
+                          children: [
+                            for (var index = 0;
+                                index < areaResults.length;
+                                index++)
+                              Column(
+                                children: [
+                                  symptomTile(areaResults[index]),
+                                  if (index < areaResults.length - 1)
+                                    const Divider(
+                                      height: 1,
+                                      indent: 68,
+                                      endIndent: 14,
+                                      color: Color(0xFFF0F3F3),
+                                    ),
+                                ],
+                              ),
+                          ],
+                        ),
+                ),
+              ],
             ),
           ),
           Container(
-            color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: Color(0xFFE5ECEC))),
+            ),
             child: Column(
               children: [
                 Row(
                   children: [
-                    Icon(Icons.check_circle_outline,
-                        size: 19,
-                        color: selected.isEmpty ? Colors.black45 : teal),
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 19,
+                      color: selected.isEmpty ? Colors.black45 : teal,
+                    ),
                     const SizedBox(width: 7),
                     Text(
                       '${selected.length} selected',
@@ -268,8 +310,10 @@ class _SymptomPageState extends State<SymptomPage> {
                           Padding(
                             padding: const EdgeInsets.only(right: 6),
                             child: InputChip(
-                              label: Text(name,
-                                  style: const TextStyle(fontSize: 12)),
+                              label: Text(
+                                name,
+                                style: const TextStyle(fontSize: 12),
+                              ),
                               onDeleted: () =>
                                   setState(() => selected.remove(name)),
                               visualDensity: VisualDensity.compact,
@@ -293,15 +337,20 @@ class _SymptomPageState extends State<SymptomPage> {
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.warning_amber_rounded,
-                        size: 15, color: Color(0xFF9D302B)),
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 15,
+                      color: Color(0xFF9D302B),
+                    ),
                     SizedBox(width: 5),
                     Flexible(
                       child: Text(
                         'Severe symptoms? Seek emergency care now.',
                         textAlign: TextAlign.center,
-                        style:
-                            TextStyle(fontSize: 11.5, color: Color(0xFF9D302B)),
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: Color(0xFF9D302B),
+                        ),
                       ),
                     ),
                   ],

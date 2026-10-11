@@ -7,7 +7,7 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Shell(
-        title: 'About this App',
+        title: 'About Mediora',
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -15,7 +15,7 @@ class AboutPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: card(),
               child: const Text(
-                'Symptom to Specialist Finder helps you decide which kind of medical specialist to consult. '
+                'Mediora helps you decide which kind of medical specialist to consult. '
                 'It links curated symptom records to ICD-10 symptom codes and weighted specialist relevance. Each selected symptom contributes a normalized share of its weighted associations; percentages describe relative relevance in this catalogue, not a diagnosis or probability.\n\n'
                 '$disclaimer It is not a replacement for professional consultation.\n\n'
                 'Nearby hospital results use your location only after you request them. Your coordinates are sent to the OpenStreetMap Overpass service; results and coverage are not guaranteed to be complete or current.\n\n'

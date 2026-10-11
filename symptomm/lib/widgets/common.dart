@@ -15,11 +15,19 @@ class Shell extends StatelessWidget {
   final String? title;
   final Widget child;
   final List<Widget> actions;
+  final Widget? floatingActionButton;
 
-  const Shell({super.key, this.title, required this.child, this.actions = const []});
+  const Shell({
+    super.key,
+    this.title,
+    required this.child,
+    this.actions = const [],
+    this.floatingActionButton,
+  });
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        floatingActionButton: floatingActionButton,
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(

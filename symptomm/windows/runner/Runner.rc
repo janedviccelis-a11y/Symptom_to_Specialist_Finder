@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "symptomm" "\0"
+            VALUE "FileDescription", "Mediora" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "symptomm" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "symptomm.exe" "\0"
-            VALUE "ProductName", "symptomm" "\0"
+            VALUE "ProductName", "Mediora" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

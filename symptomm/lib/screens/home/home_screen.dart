@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:symptomm/pages/about_page.dart';
-import 'package:symptomm/pages/history_page.dart';
-import 'package:symptomm/pages/library_page.dart';
 import 'package:symptomm/pages/symptom_page.dart';
 import 'package:symptomm/widgets/common.dart';
 
@@ -13,25 +11,84 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Shell(
+        floatingActionButton: FloatingActionButton(
+          tooltip: 'About Mediora',
+          onPressed: () => go(context, const AboutPage()),
+          backgroundColor: Colors.white,
+          foregroundColor: blue,
+          elevation: 4,
+          child: const Icon(Icons.info_outline_rounded),
+        ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x142F6AA3),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.health_and_safety_rounded,
+                        color: blue,
+                        size: 27,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'MEDIORA',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        Text(
+                          'HEALTH GUIDANCE',
+                          style: TextStyle(
+                            color: Color(0xFF637783),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
               Container(
                 padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(28),
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF2F6AA3), Color(0xFF3E9A92)],
+                    colors: [Color(0xFF1D547F), Color(0xFF318F88)],
                   ),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0x222F6AA3),
-                      blurRadius: 20,
-                      offset: Offset(0, 10),
+                      color: Color(0x292F6AA3),
+                      blurRadius: 24,
+                      offset: Offset(0, 12),
                     ),
                   ],
                 ),
@@ -43,34 +100,34 @@ class HomeScreen extends StatelessWidget {
                       height: 52,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: .18),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: const Icon(
-                        Icons.health_and_safety_outlined,
+                        Icons.favorite_rounded,
                         color: Colors.white,
                         size: 30,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 22),
                     const Text(
-                      'Symptom to\nSpecialist Finder',
+                      'Find the right\ncare for you.',
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 34,
                         fontWeight: FontWeight.w900,
-                        height: 1.08,
+                        height: 1.06,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     Text(
-                      'Understand which kind of care may be relevant to the symptoms you select.',
+                      'A clearer first step toward the medical specialist who can help.',
                       style: TextStyle(
                         fontSize: 15,
-                        height: 1.4,
+                        height: 1.45,
                         color: Colors.white.withValues(alpha: .92),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 22),
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton.icon(
@@ -78,88 +135,59 @@ class HomeScreen extends StatelessWidget {
                         icon: const Icon(Icons.arrow_forward_rounded),
                         label: const Text('Start New Symptom Search'),
                         style: FilledButton.styleFrom(
-                          foregroundColor: blue,
+                          foregroundColor: const Color(0xFF1D547F),
                           backgroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(52),
-                          textStyle:
-                              const TextStyle(fontWeight: FontWeight.w800),
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: card(),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE0E9EA)),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0D12202B),
+                      blurRadius: 16,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
                 child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(Icons.info_outline, color: blue),
-                    SizedBox(width: 12),
+                    Icon(
+                      Icons.health_and_safety_outlined,
+                      color: Color(0xFF358977),
+                      size: 26,
+                    ),
+                    SizedBox(width: 13),
                     Expanded(
                       child: Text(
-                        'This tool offers general specialty guidance, not a diagnosis. For severe or rapidly worsening symptoms, seek emergency care now.',
-                        style: TextStyle(height: 1.4, fontSize: 13),
+                        'Guidance, not a diagnosis. If symptoms are severe or rapidly worsening, seek emergency care.',
+                        style: TextStyle(
+                          height: 1.4,
+                          fontSize: 13,
+                          color: ink,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 22),
-              const Text(
-                'Explore',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  color: ink,
-                ),
-              ),
-              const SizedBox(height: 8),
-              for (final item in [
-                (
-                  'Recent searches',
-                  'Review your saved symptom selections',
-                  Icons.history_rounded,
-                  const HistoryPage(),
-                ),
-                (
-                  'Specialty library',
-                  'Browse the available medical specialties',
-                  Icons.medical_services_outlined,
-                  const LibraryPage(),
-                ),
-                (
-                  'About this app',
-                  'Learn about the guidance and data sources',
-                  Icons.info_outline_rounded,
-                  const AboutPage(),
-                ),
-              ])
-                Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  color: Colors.white.withValues(alpha: .92),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: Color(0xFFB9D7DC)),
-                  ),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: const Color(0xFFE8F2F1),
-                      foregroundColor: blue,
-                      child: Icon(item.$3),
-                    ),
-                    title: Text(
-                      item.$1,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    subtitle: Text(item.$2),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => go(context, item.$4),
-                  ),
-                ),
             ],
           ),
         ),

@@ -1,5 +1,5 @@
 name: symptomm
-description: Symptom to Specialist Finder - suggests medical specialties for symptoms (not a diagnostic tool).
+description: Mediora offers general medical specialty guidance based on selected symptoms (not a diagnostic tool).
 publish_to: "none"
 version: 1.0.0+1
 
@@ -14,7 +14,7 @@ dependencies:
   http: ^1.6.0
   latlong2: ^0.9.1
   shared_preferences: ^2.2.3
-
+  webview_all: ^1.4.4
 dev_dependencies:
   flutter_lints: ^3.0.0
   flutter_test:

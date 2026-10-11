@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => ValueListenableBuilder<double>(
         valueListenable: textScale,
         builder: (_, scale, __) => MaterialApp(
-          title: 'Symptom to Specialist Finder',
+          title: 'Mediora',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: true,
