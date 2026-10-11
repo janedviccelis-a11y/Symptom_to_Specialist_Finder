@@ -13,7 +13,6 @@ class SymptomPage extends StatefulWidget {
 class _SymptomPageState extends State<SymptomPage> {
   final selected = <String>{};
   final controller = TextEditingController();
-  bool bodyTab = false;
   String area = cats.keys.first;
 
   static const categoryIcons = <String, IconData>{
@@ -141,73 +140,13 @@ class _SymptomPageState extends State<SymptomPage> {
     );
   }
 
-  Widget categoryCard(String key) => Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: card(),
-        child: ExpansionTile(
-          key: PageStorageKey(key),
-          shape: const Border(),
-          collapsedShape: const Border(),
-          initiallyExpanded:
-              symptoms.any((s) => s.cat == key && selected.contains(s.name)),
-          leading: categoryIllustration(key, size: 29),
-          title: Text(key,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-          subtitle: Text(
-            selectedCount(key) > 0
-                ? '${selectedCount(key)} selected'
-                : '${symptoms.where((s) => s.cat == key).length} symptoms',
-          ),
-          children: [
-            for (final symptom in symptoms.where((s) => s.cat == key))
-              tile(symptom)
-          ],
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
     final query = controller.text.trim();
-    final List<Widget> items;
-
-    if (query.isNotEmpty) {
-      final results = search(query);
-      items = results.isEmpty
-          ? [
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  'No matching symptoms. Try another word, or browse the categories.',
-                ),
-              ),
-            ]
-          : results.map(tile).toList();
-    } else if (!bodyTab) {
-      items = [for (final key in cats.keys) categoryCard(key)];
-    } else {
-      items = [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [for (final key in cats.keys) areaChoice(key)],
-        ),
-        const SizedBox(height: 14),
-        Text(area,
-            style: const TextStyle(
-                fontSize: 17, fontWeight: FontWeight.w800, color: ink)),
-        const SizedBox(height: 6),
-        Container(
-          decoration: card(),
-          child: Column(
-            children: [
-              for (final symptom in symptoms.where((s) => s.cat == area))
-                tile(symptom)
-            ],
-          ),
-        ),
-      ];
-    }
+    final areaSymptoms = symptoms.where((symptom) => symptom.cat == area);
+    final areaResults = query.isEmpty
+        ? areaSymptoms.toList()
+        : search(query).where((symptom) => symptom.cat == area).toList();
 
     return Shell(
       title: 'Describe Your Symptoms',
@@ -239,35 +178,6 @@ class _SymptomPageState extends State<SymptomPage> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SegmentedButton<bool>(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(
-                    value: false,
-                    icon: Icon(Icons.list_alt),
-                    label: Text('Symptoms')),
-                ButtonSegment(
-                    value: true,
-                    icon: Icon(Icons.accessibility_new),
-                    label: Text('Body area')),
-              ],
-              selected: {bodyTab},
-              onSelectionChanged: (value) =>
-                  setState(() => bodyTab = value.first),
-              style: SegmentedButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: .65),
-                foregroundColor: ink,
-                selectedForegroundColor: Colors.white,
-                selectedBackgroundColor: ink,
-                textStyle:
-                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                padding: const EdgeInsets.symmetric(vertical: 11),
-                side: BorderSide.none,
-              ),
-            ),
-          ),
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
@@ -285,23 +195,42 @@ class _SymptomPageState extends State<SymptomPage> {
                 ),
               ),
               child: ListView(
-                key: ValueKey('$bodyTab:$area:${controller.text.isNotEmpty}'),
+                key: ValueKey('$area:${controller.text.isNotEmpty}'),
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                 children: [
-                  if (query.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Text(
-                        bodyTab
-                            ? 'Choose a body area'
-                            : 'Choose what you are feeling',
-                        style: const TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.w800,
-                            color: ink),
-                      ),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      'Choose a body area',
+                      style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          color: ink),
                     ),
-                  ...items,
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [for (final key in cats.keys) areaChoice(key)],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    area,
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w800, color: ink),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    decoration: card(),
+                    child: areaResults.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text(
+                              'No matching symptoms in this body area. Try another search or choose a different area.',
+                            ),
+                          )
+                        : Column(children: [for (final symptom in areaResults) tile(symptom)]),
+                  ),
                 ],
               ),
             ),

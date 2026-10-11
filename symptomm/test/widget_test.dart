@@ -16,17 +16,18 @@ void main() {
     expect(find.text('Describe Your Symptoms'), findsOneWidget);
   });
 
-  testWidgets('body area picker includes digestion symptoms',
+  testWidgets('symptom selection shows symptoms only for selected body area',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.tap(find.text('Start New Symptom Search'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Body area'));
-    await tester.pumpAndSettle();
+    expect(find.text('Choose a body area'), findsOneWidget);
+    expect(find.text('Abdomen & Digestion'), findsOneWidget);
 
     await tester.tap(find.text('Abdomen & Digestion'));
     await tester.pumpAndSettle();
     expect(find.text('Stomach Pain'), findsOneWidget);
+    expect(find.text('Headache'), findsNothing);
 
     await tester.tap(find.text('Stomach Pain'));
     await tester.pumpAndSettle();
