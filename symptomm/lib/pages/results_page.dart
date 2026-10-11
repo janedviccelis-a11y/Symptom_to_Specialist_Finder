@@ -98,7 +98,7 @@ class _ResultsPageState extends State<ResultsPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${recommendation.pct}% match',
+                    '${recommendation.pct}% relevance',
                     style: const TextStyle(
                       color: Color(0xFF28734A),
                       fontWeight: FontWeight.w800,
@@ -153,6 +153,13 @@ class _ResultsPageState extends State<ResultsPage> {
                       side: BorderSide.none,
                     ),
                 ],
+              ),
+            ],
+            if (recommendation.icd10Codes.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'ICD-10 symptom codes: ${recommendation.icd10Codes.join(', ')}',
+                style: const TextStyle(fontSize: 11, color: Color(0xFF53636B)),
               ),
             ],
             const SizedBox(height: 12),

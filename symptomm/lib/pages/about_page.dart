@@ -16,8 +16,9 @@ class AboutPage extends StatelessWidget {
               decoration: card(),
               child: const Text(
                 'Symptom to Specialist Finder helps you decide which kind of medical specialist to consult. '
-                'It matches the symptoms you choose against a curated rule table and ranks specialties by a weighted score.\n\n'
+                'It links curated symptom records to ICD-10 symptom codes and weighted specialist relevance. Each selected symptom contributes a normalized share of its weighted associations; percentages describe relative relevance in this catalogue, not a diagnosis or probability.\n\n'
                 '$disclaimer It is not a replacement for professional consultation.\n\n'
+                'Nearby hospital results use your location only after you request them. Your coordinates are sent to the OpenStreetMap Overpass service; results and coverage are not guaranteed to be complete or current.\n\n'
                 'Project proposal by Celis, Jan Edvic D. and Joson, Ralph Xaviery P. (BSCPE-4).',
               ),
             ),

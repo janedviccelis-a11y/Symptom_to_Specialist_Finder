@@ -1,13 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:symptomm/models/clinic_data.dart';
 import 'package:symptomm/models/symptom_data.dart';
 import 'package:symptomm/pages/clinic_map_page.dart';
+import 'package:symptomm/services/nearby_hospital_service.dart';
 import 'package:symptomm/widgets/common.dart';
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final Specialty specialty;
 
   const DetailPage(this.specialty, {super.key});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  bool findingHospitals = false;
+
+  Future<void> findHospitals() async {
+    setState(() => findingHospitals = true);
+    try {
+      final results = await findNearbyHospitals();
+      if (!mounted) return;
+      if (results.hospitals.isEmpty) {
+        snack(context, 'No mapped hospitals were found within 15 km of your location.');
+        return;
+      }
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HospitalMapPage(
+            hospitals: results.hospitals,
+            userLocation: results.userLocation,
+          ),
+        ),
+      );
+    } on HospitalLookupException catch (error) {
+      if (mounted) snack(context, error.message);
+    } finally {
+      if (mounted) setState(() => findingHospitals = false);
+    }
+  }
 
   Widget heading(String title) => Padding(
         padding: const EdgeInsets.only(top: 18, bottom: 6),
@@ -28,9 +60,8 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final specialty = widget.specialty;
     final firstWord = specialty.name.split(' ').first;
-    final controller = TextEditingController();
-    final localClinics = searchClinics(specialty.name);
 
     return Shell(
       title: specialty.name,
@@ -84,64 +115,37 @@ class DetailPage extends StatelessWidget {
           Text(specialty.when, style: const TextStyle(fontSize: 16)),
           heading('Common Diagnostic Tests'),
           bulletList(specialty.tests),
-          heading('Search for Local $firstWord Specialists'),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: 'Search city or clinic...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: Colors.white,
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onSubmitted: (value) {
-              final query = value.trim();
-              final matches = searchClinics(specialty.name, query: query);
-              if (matches.isEmpty) {
-                snack(context, 'No local clinics match that selection.');
-                return;
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ClinicMapPage(
-                    clinics: matches,
-                    title: '${specialty.name} clinics',
-                  ),
-                ),
-              );
-            },
+          heading('Find a hospital near you'),
+          const Text(
+            'Use your current device location to search OpenStreetMap for hospitals within 15 km. Your coordinates are sent to the OpenStreetMap Overpass service for this search.',
+            style: TextStyle(fontSize: 14, height: 1.45),
           ),
-          const SizedBox(height: 12),
-          if (localClinics.isNotEmpty) ...[
-            const Text(
-              'Nearby clinics',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            for (final clinic in localClinics.take(3))
-              Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(10),
-                decoration: card(),
-                child: ListTile(
-                  title: Text(clinic.name,
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                  subtitle: Text('${clinic.city} • ${clinic.address}'),
-                  trailing: const Icon(Icons.location_on_outlined, color: blue),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ClinicMapPage(
-                        clinics: [clinic],
-                        title: clinic.name,
-                      ),
+          const SizedBox(height: 10),
+          FilledButton.icon(
+            onPressed: findingHospitals ? null : findHospitals,
+            icon: findingHospitals
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
                     ),
-                  ),
-                ),
-              ),
-          ],
+                  )
+                : const Icon(Icons.my_location),
+            label: Text(findingHospitals
+                ? 'Finding nearby hospitals...'
+                : 'Find nearest hospitals'),
+            style: FilledButton.styleFrom(
+              backgroundColor: blue,
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'OpenStreetMap data may be incomplete. If you need urgent care, call your local emergency number.',
+            style: TextStyle(fontSize: 12, color: Colors.black54),
+          ),
           const SizedBox(height: 16),
           const Text(disclaimer, style: TextStyle(fontSize: 12.5)),
         ],

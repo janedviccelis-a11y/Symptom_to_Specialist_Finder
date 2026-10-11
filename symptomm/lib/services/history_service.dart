@@ -15,3 +15,8 @@ Future<void> saveHistory(List<String> symptoms) async {
   history.insert(0, jsonEncode({'t': DateTime.now().toIso8601String(), 's': symptoms}));
   await prefs.setStringList('history', history.take(30).toList());
 }
+
+Future<void> clearHistory() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('history');
+}

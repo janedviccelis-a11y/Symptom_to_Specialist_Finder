@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-const _sp = {
-  'D': 'Dermatology', 'C': 'Cardiology', 'E': 'ENT - Otolaryngology',
-  'G': 'Gastroenterology', 'N': 'Neurology', 'O': 'Orthopedics',
-  'P': 'Pulmonology', 'R': 'Rheumatology',
-};
-
 const cats = <String, IconData>{
   'Head & Neck': Icons.face,
   'Chest & Breathing': Icons.monitor_heart_outlined,
@@ -15,54 +9,150 @@ const cats = <String, IconData>{
 };
 
 class Symptom {
-  final String name, cat;
+  final String name, cat, icd10Code, icd10Description;
   final List<String> alias;
-  final Map<String, int> w;
+  final Map<String, double> relevance;
   final bool red;
 
-  Symptom(this.name, this.cat, this.alias, String weights, {this.red = false})
-      : w = {
-          for (final p in weights.split(' ')) _sp[p[0]]!: int.parse(p.substring(1)),
-        };
+  Symptom(
+    this.name,
+    this.cat,
+    this.alias,
+    this.icd10Code,
+    this.icd10Description,
+    this.relevance, {
+    this.red = false,
+  });
 }
 
 final symptoms = <Symptom>[
-  Symptom('Headache', 'Head & Neck', ['head pain', 'migraine'], 'N4 E1'),
-  Symptom('Dizziness', 'Head & Neck', ['vertigo', 'lightheaded'], 'N3 E2 C1'),
-  Symptom('Sore Throat', 'Head & Neck', ['throat pain'], 'E4'),
-  Symptom('Sinus Pressure', 'Head & Neck', ['stuffy nose', 'congestion'], 'E4 P1'),
-  Symptom('Ear Pain', 'Head & Neck', ['earache'], 'E4'),
-  Symptom('Sudden Numbness', 'Head & Neck', ['numb face', 'weak one side'], 'N5', red: true),
-  Symptom('Chest Pain', 'Chest & Breathing', ['chest tightness'], 'C4 P2 G1', red: true),
-  Symptom('Difficulty Breathing', 'Chest & Breathing', ['trouble breathing'], 'P4 C3', red: true),
-  Symptom('Shortness of Breath (Exercise-related)', 'Chest & Breathing', ['short of breath', 'breathless'], 'C3 P3'),
-  Symptom('Persistent Cough', 'Chest & Breathing', ['cough', 'chronic cough'], 'P4 E1'),
-  Symptom('Palpitations', 'Chest & Breathing', ['racing heart', 'irregular heartbeat'], 'C4'),
-  Symptom('Wheezing', 'Chest & Breathing', [], 'P4 E1'),
-  Symptom('Stomach Pain', 'Abdomen & Digestion', ['tummy ache', 'abdominal pain', 'belly pain'], 'G4'),
-  Symptom('Nausea', 'Abdomen & Digestion', ['queasy', 'vomiting'], 'G3 N1'),
-  Symptom('Heartburn', 'Abdomen & Digestion', ['acid reflux', 'indigestion'], 'G4 C1'),
-  Symptom('Diarrhea', 'Abdomen & Digestion', ['loose stools'], 'G4'),
-  Symptom('Bloating', 'Abdomen & Digestion', ['gas'], 'G3'),
-  Symptom('Joint Pain', 'Muscles & Joints', ['achy joints'], 'R4 O3'),
-  Symptom('Joint Stiffness', 'Muscles & Joints', ['morning stiffness'], 'R4 O2'),
-  Symptom('Swollen Joints', 'Muscles & Joints', ['joint swelling'], 'R4 O2'),
-  Symptom('Back Pain', 'Muscles & Joints', ['lower back pain'], 'O4 N1 R1'),
-  Symptom('Muscle Weakness', 'Muscles & Joints', [], 'N3 O2 R1'),
-  Symptom('Unexplained Rash', 'Skin & Hair', ['rash', 'hives'], 'D4 R1'),
-  Symptom('Persistent Itching', 'Skin & Hair', ['itchy skin', 'itch'], 'D4'),
-  Symptom('Skin Redness', 'Skin & Hair', ['red skin'], 'D3 R1'),
-  Symptom('Hair Loss', 'Skin & Hair', ['balding', 'thinning hair'], 'D4'),
-  Symptom('Changing Mole', 'Skin & Hair', ['mole', 'skin changes'], 'D5'),
+  Symptom('Headache', 'Head & Neck', ['head pain', 'migraine'], 'R51.9',
+      'Headache, unspecified', {'Neurology': 4, 'ENT - Otolaryngology': 1}),
+  Symptom('Dizziness', 'Head & Neck', ['vertigo', 'lightheaded'], 'R42',
+      'Dizziness and giddiness', {'Neurology': 3, 'ENT - Otolaryngology': 2, 'Cardiology': 1}),
+  Symptom('Sore Throat', 'Head & Neck', ['throat pain'], 'J02.9',
+      'Acute pharyngitis, unspecified', {'ENT - Otolaryngology': 4}),
+  Symptom('Sinus Pressure', 'Head & Neck', ['stuffy nose', 'congestion'], 'R09.81',
+      'Nasal congestion', {'ENT - Otolaryngology': 4, 'Pulmonology': 1}),
+  Symptom('Ear Pain', 'Head & Neck', ['earache'], 'H92.09',
+      'Otalgia, unspecified ear', {'ENT - Otolaryngology': 4}),
+  Symptom('Sudden Numbness', 'Head & Neck', ['numb face', 'weak one side'], 'R20.0',
+      'Anesthesia of skin', {'Neurology': 5}, red: true),
+  Symptom('Chest Pain', 'Chest & Breathing', ['chest tightness'], 'R07.9',
+      'Chest pain, unspecified', {'Cardiology': 4, 'Pulmonology': 2, 'Gastroenterology': 1}, red: true),
+  Symptom('Difficulty Breathing', 'Chest & Breathing', ['trouble breathing'], 'R06.00',
+      'Dyspnea, unspecified', {'Pulmonology': 4, 'Cardiology': 3}, red: true),
+  Symptom('Shortness of Breath (Exercise-related)', 'Chest & Breathing',
+      ['short of breath', 'breathless'], 'R06.02', 'Shortness of breath',
+      {'Cardiology': 3, 'Pulmonology': 3}),
+  Symptom('Persistent Cough', 'Chest & Breathing', ['cough', 'chronic cough'], 'R05.3',
+      'Chronic cough', {'Pulmonology': 4, 'ENT - Otolaryngology': 1}),
+  Symptom('Palpitations', 'Chest & Breathing', ['racing heart', 'irregular heartbeat'], 'R00.2',
+      'Palpitations', {'Cardiology': 4}),
+  Symptom('Wheezing', 'Chest & Breathing', [], 'R06.2',
+      'Wheezing', {'Pulmonology': 4, 'ENT - Otolaryngology': 1}),
+  Symptom('Stomach Pain', 'Abdomen & Digestion',
+      ['tummy ache', 'abdominal pain', 'belly pain'], 'R10.9',
+      'Unspecified abdominal pain', {'Gastroenterology': 4}),
+  Symptom('Nausea', 'Abdomen & Digestion', ['queasy', 'vomiting'], 'R11.0',
+      'Nausea', {'Gastroenterology': 3, 'Neurology': 1}),
+  Symptom('Heartburn', 'Abdomen & Digestion', ['acid reflux', 'indigestion'], 'R12',
+      'Heartburn', {'Gastroenterology': 4, 'Cardiology': 1}),
+  Symptom('Diarrhea', 'Abdomen & Digestion', ['loose stools'], 'R19.7',
+      'Diarrhea, unspecified', {'Gastroenterology': 4}),
+  Symptom('Bloating', 'Abdomen & Digestion', ['gas'], 'R14.0',
+      'Abdominal distension (gaseous)', {'Gastroenterology': 3}),
+  Symptom('Joint Pain', 'Muscles & Joints', ['achy joints'], 'M25.50',
+      'Pain in unspecified joint', {'Rheumatology': 4, 'Orthopedics': 3}),
+  Symptom('Joint Stiffness', 'Muscles & Joints', ['morning stiffness'], 'M25.60',
+      'Stiffness of unspecified joint', {'Rheumatology': 4, 'Orthopedics': 2}),
+  Symptom('Swollen Joints', 'Muscles & Joints', ['joint swelling'], 'M25.40',
+      'Effusion, unspecified joint', {'Rheumatology': 4, 'Orthopedics': 2}),
+  Symptom('Back Pain', 'Muscles & Joints', ['lower back pain'], 'M54.9',
+      'Dorsalgia, unspecified', {'Orthopedics': 4, 'Neurology': 1, 'Rheumatology': 1}),
+  Symptom('Muscle Weakness', 'Muscles & Joints', [], 'M62.81',
+      'Muscle weakness (generalized)', {'Neurology': 3, 'Orthopedics': 2, 'Rheumatology': 1}),
+  Symptom('Unexplained Rash', 'Skin & Hair', ['rash', 'hives'], 'R21',
+      'Rash and other nonspecific skin eruption', {'Dermatology': 4, 'Rheumatology': 1}),
+  Symptom('Persistent Itching', 'Skin & Hair', ['itchy skin', 'itch'], 'L29.9',
+      'Pruritus, unspecified', {'Dermatology': 4}),
+  Symptom('Skin Redness', 'Skin & Hair', ['red skin'], 'L53.9',
+      'Erythematous condition, unspecified', {'Dermatology': 3, 'Rheumatology': 1}),
+  Symptom('Hair Loss', 'Skin & Hair', ['balding', 'thinning hair'], 'L65.9',
+      'Nonscarring hair loss, unspecified', {'Dermatology': 4}),
+  Symptom('Changing Mole', 'Skin & Hair', ['mole', 'skin changes'], 'D22.9',
+      'Melanocytic nevi, unspecified', {'Dermatology': 5}),
 ];
 
-List<Symptom> search(String q) {
-  final t = q.toLowerCase().trim();
-  return symptoms
-      .where((s) =>
-          s.name.toLowerCase().contains(t) ||
-          s.alias.any((a) => a.contains(t) || t.contains(a)))
-      .toList();
+String _normalize(String value) => value
+    .toLowerCase()
+    .replaceAll(RegExp(r'[^a-z0-9 ]'), ' ')
+    .replaceAll(RegExp(r'\s+'), ' ')
+    .trim();
+
+int _editDistance(String a, String b) {
+  if (a.isEmpty) return b.length;
+  if (b.isEmpty) return a.length;
+  var previous = List<int>.generate(b.length + 1, (i) => i);
+  for (var i = 1; i <= a.length; i++) {
+    final current = List<int>.filled(b.length + 1, 0)..[0] = i;
+    for (var j = 1; j <= b.length; j++) {
+      current[j] = [
+        current[j - 1] + 1,
+        previous[j] + 1,
+        previous[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1),
+      ].reduce((x, y) => x < y ? x : y);
+    }
+    previous = current;
+  }
+  return previous[b.length];
+}
+
+int _searchScore(String query, Symptom symptom) {
+  final fields = [symptom.name, ...symptom.alias].map(_normalize).toList();
+  var best = 0;
+  for (final field in fields) {
+    if (field == query) {
+      best = best < 100 ? 100 : best;
+    } else if (field.startsWith(query)) {
+      best = best < 90 ? 90 : best;
+    } else if (field.contains(query)) {
+      best = best < 80 ? 80 : best;
+    }
+  }
+
+  final queryTokens = query.split(' ');
+  final allText = fields.join(' ');
+  final fieldTokens = allText.split(' ').toSet();
+  var matchedTokens = 0;
+  for (final token in queryTokens) {
+    if (fieldTokens.any((candidate) =>
+        candidate == token ||
+        candidate.startsWith(token) ||
+        (token.length >= 4 &&
+            _editDistance(candidate, token) <= (token.length >= 7 ? 2 : 1)))) {
+      matchedTokens++;
+    }
+  }
+  if (matchedTokens > 0) {
+    final tokenScore = 40 + (matchedTokens * 15 ~/ queryTokens.length);
+    if (tokenScore > best) best = tokenScore;
+  }
+  return best;
+}
+
+List<Symptom> search(String query) {
+  final normalized = _normalize(query);
+  if (normalized.isEmpty) return List.of(symptoms);
+  final ranked = [
+    for (var index = 0; index < symptoms.length; index++)
+      (symptom: symptoms[index], index: index, score: _searchScore(normalized, symptoms[index])),
+  ]..removeWhere((item) => item.score == 0);
+  ranked.sort((a, b) {
+    final relevanceOrder = b.score.compareTo(a.score);
+    return relevanceOrder != 0 ? relevanceOrder : a.index.compareTo(b.index);
+  });
+  return ranked.map((item) => item.symptom).toList();
 }
 
 class Specialty {
@@ -130,8 +220,9 @@ class Rec {
   final Specialty s;
   final int pct;
   final List<String> because;
+  final List<String> icd10Codes;
 
-  Rec(this.s, this.pct, this.because);
+  Rec(this.s, this.pct, this.because, this.icd10Codes);
 }
 
 class Outcome {
@@ -145,26 +236,32 @@ Outcome analyze(Iterable<String> names) {
   final chosen = symptoms.where((s) => names.contains(s.name)).toList();
   if (chosen.isEmpty) return Outcome([], []);
 
-  final score = <String, int>{};
+  final score = <String, double>{};
   final why = <String, List<String>>{};
-  var max = 0;
+  final codes = <String, Set<String>>{};
 
   for (final s in chosen) {
-    max += s.w.values.reduce((a, b) => a > b ? a : b);
-    s.w.forEach((k, v) {
-      score[k] = (score[k] ?? 0) + v;
-      (why[k] ??= []).add(s.name);
+    final totalRelevance = s.relevance.values.fold<double>(0, (sum, value) => sum + value);
+    if (totalRelevance == 0) continue;
+    s.relevance.forEach((specialty, weight) {
+      score[specialty] = (score[specialty] ?? 0) + weight / totalRelevance;
+      (why[specialty] ??= []).add(s.name);
+      (codes[specialty] ??= <String>{}).add(s.icd10Code);
     });
   }
 
   final recs = score.entries
       .map((e) => Rec(
           specialties[e.key]!,
-          (e.value * 100 / max).round().clamp(0, 100).toInt(),
+          (e.value * 100 / chosen.length).round().clamp(0, 100).toInt(),
           why[e.key]!,
+          codes[e.key]!.toList(),
         ))
       .toList()
-    ..sort((a, b) => b.pct.compareTo(a.pct));
+    ..sort((a, b) {
+      final scoreOrder = b.pct.compareTo(a.pct);
+      return scoreOrder != 0 ? scoreOrder : a.s.name.compareTo(b.s.name);
+    });
 
   return Outcome(recs, [for (final s in chosen) if (s.red) s.name]);
 }

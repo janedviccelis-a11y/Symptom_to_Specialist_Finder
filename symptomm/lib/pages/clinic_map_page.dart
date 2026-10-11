@@ -1,64 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:symptomm/models/clinic_data.dart';
+import 'package:symptomm/models/hospital.dart';
 
-class ClinicMapPage extends StatelessWidget {
-  final List<Clinic> clinics;
-  final String title;
+class HospitalMapPage extends StatelessWidget {
+  final List<Hospital> hospitals;
+  final LatLng userLocation;
 
-  const ClinicMapPage({
+  const HospitalMapPage({
     super.key,
-    required this.clinics,
-    required this.title,
+    required this.hospitals,
+    required this.userLocation,
   });
+
+  String _formatDistance(double meters) => meters < 1000
+      ? '${meters.round()} m away'
+      : '${(meters / 1000).toStringAsFixed(1)} km away';
 
   @override
   Widget build(BuildContext context) {
-    final markers = clinics
-        .map(
-          (clinic) => Marker(
-            point: clinic.location,
-            width: 46,
-            height: 46,
-            child: Tooltip(
-              message: '${clinic.name}\n${clinic.city}',
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.location_on, color: Colors.white, size: 22),
-              ),
+    final markers = [
+      Marker(
+        point: userLocation,
+        width: 46,
+        height: 46,
+        child: const Tooltip(
+          message: 'Your location',
+          child: Icon(Icons.my_location, color: Color(0xFF2F6AA3), size: 32),
+        ),
+      ),
+      for (final hospital in hospitals)
+        Marker(
+          point: hospital.location,
+          width: 46,
+          height: 46,
+          child: Tooltip(
+            message: hospital.name,
+            child: const Icon(
+              Icons.local_hospital,
+              color: Color(0xFFD34B43),
+              size: 32,
             ),
           ),
-        )
-        .toList();
-
-    final center = clinics.length > 1
-        ? LatLng(
-            clinics.map((c) => c.latitude).reduce((a, b) => a + b) / clinics.length,
-            clinics.map((c) => c.longitude).reduce((a, b) => a + b) / clinics.length,
-          )
-        : clinics.first.location;
+        ),
+    ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: const Text('Nearby hospitals')),
       body: Column(
         children: [
           Expanded(
             child: FlutterMap(
               options: MapOptions(
-                initialCenter: center,
-                initialZoom: 11,
-                interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
+                initialCenter: userLocation,
+                initialZoom: 12,
+                interactionOptions:
+                    const InteractionOptions(flags: InteractiveFlag.all),
               ),
               children: [
                 TileLayer(
@@ -67,25 +64,55 @@ class ClinicMapPage extends StatelessWidget {
                   maxZoom: 19,
                 ),
                 MarkerLayer(markers: markers),
+                const RichAttributionWidget(
+                  attributions: [
+                    TextSourceAttribution('OpenStreetMap contributors'),
+                  ],
+                ),
               ],
             ),
           ),
           Container(
-            constraints: const BoxConstraints(maxHeight: 220),
-            padding: const EdgeInsets.all(12),
-            child: ListView.builder(
-              itemCount: clinics.length,
-              itemBuilder: (_, index) {
-                final clinic = clinics[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(clinic.name),
-                    subtitle: Text('${clinic.city} • ${clinic.address}'),
-                    trailing: const Icon(Icons.call, size: 18),
+            constraints: const BoxConstraints(maxHeight: 260),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hospitals.isEmpty
+                      ? 'No hospitals found within 15 km'
+                      : '${hospitals.length} nearby hospital${hospitals.length == 1 ? '' : 's'} · nearest first',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: hospitals.length,
+                    itemBuilder: (_, index) {
+                      final hospital = hospitals[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.local_hospital,
+                            color: Color(0xFFD34B43),
+                          ),
+                          title: Text(hospital.name),
+                          subtitle: Text([
+                            if (hospital.address.isNotEmpty) hospital.address,
+                            _formatDistance(hospital.distanceMeters),
+                          ].join(' · ')),
+                          isThreeLine: hospital.address.isNotEmpty,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+                const Text(
+                  'Distances are straight-line estimates. Hospital data: OpenStreetMap contributors; coverage may be incomplete.',
+                  style: TextStyle(fontSize: 11, color: Colors.black54),
+                ),
+              ],
             ),
           ),
         ],
