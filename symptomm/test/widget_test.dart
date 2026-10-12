@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:symptomm/app_state.dart';
 import 'package:symptomm/main.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({'dark_mode': false});
+    darkMode.value = false;
+  });
+
   testWidgets('app loads and opens the symptom flow',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
 
     expect(find.text('MEDIORA'), findsOneWidget);
     expect(find.text('Start New Symptom Search'), findsOneWidget);
@@ -25,6 +33,7 @@ void main() {
   testWidgets('about page is opened from the home icon',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('About Mediora'));
     await tester.pumpAndSettle();
 
@@ -32,24 +41,61 @@ void main() {
     expect(find.textContaining('Mediora helps you decide'), findsOneWidget);
   });
 
-  testWidgets('symptom selection shows symptoms only for selected body area',
+  testWidgets('home shows the app logo and toggles the color theme',
+      (WidgetTester tester) async {
+    darkMode.value = false;
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    final logo = tester.widget<Image>(find.byType(Image).first);
+    expect(
+        (logo.image as AssetImage).assetName, 'assets/images/mediora_logo.png');
+    expect(tester.takeException(), isNull);
+    expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.light);
+
+    await tester.tap(find.byTooltip('Switch to dark mode'));
+    await tester.pump();
+
+    expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.dark);
+    expect(find.byTooltip('Switch to light mode'), findsOneWidget);
+  });
+
+  testWidgets('home control returns to the first page without a back header',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start New Symptom Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Go back'), findsNothing);
+    expect(find.byTooltip('Home'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Home'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('MEDIORA'), findsOneWidget);
+  });
+
+  testWidgets('selected body area filters the symptom list',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Start New Symptom Search'));
     await tester.pumpAndSettle();
     expect(find.text('Where does it hurt?'), findsOneWidget);
     expect(find.text('Or choose an area'), findsNothing);
 
-    await tester.tap(find.byTooltip('Abdomen & Digestion'));
+    tester
+        .widget<ActionChip>(
+          find.widgetWithText(ActionChip, 'Abdomen & Digestion'),
+        )
+        .onPressed!
+        .call();
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Stomach Pain'),
-      180,
-      scrollable: find.descendant(
-        of: find.byType(ListView).first,
-        matching: find.byType(Scrollable),
-      ),
-    );
+    await tester.drag(find.byType(ListView).first, const Offset(0, -450));
+    await tester.pumpAndSettle();
     expect(find.text('Stomach Pain'), findsOneWidget);
     expect(find.text('Headache'), findsNothing);
 
@@ -68,13 +114,19 @@ void main() {
     expect(find.text('What Conditions They Handle'), findsOneWidget);
   });
 
-  testWidgets('tapping a body map region shows its symptoms',
+  testWidgets('selecting a body area shows matching symptoms',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Start New Symptom Search'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Chest & Breathing'));
+    tester
+        .widget<ActionChip>(
+          find.widgetWithText(ActionChip, 'Chest & Breathing'),
+        )
+        .onPressed!
+        .call();
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -450));
     await tester.pumpAndSettle();

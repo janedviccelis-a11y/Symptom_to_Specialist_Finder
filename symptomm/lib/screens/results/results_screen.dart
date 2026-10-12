@@ -28,7 +28,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
     }
   }
 
-  Widget menu(String label, List<String> options, void Function(int) pick) => PopupMenuButton<int>(
+  Widget menu(String label, List<String> options, void Function(int) pick) =>
+      PopupMenuButton<int>(
         onSelected: (value) => setState(() => pick(value)),
         itemBuilder: (_) => [
           for (var i = 0; i < options.length; i++)
@@ -36,13 +37,17 @@ class _ResultsScreenState extends State<ResultsScreen> {
         ],
         child: Row(
           children: [
-            Text(label, style: const TextStyle(color: blue, fontWeight: FontWeight.w600)),
+            Text(label,
+                style:
+                    const TextStyle(color: blue, fontWeight: FontWeight.w600)),
             const Icon(Icons.keyboard_arrow_down, color: blue),
           ],
         ),
       );
 
-  Widget specialtyCard(BuildContext context, int number, Rec recommendation, bool top) => Container(
+  Widget specialtyCard(
+          BuildContext context, int number, Rec recommendation, bool top) =>
+      Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
         decoration: card(border: top ? teal : null),
@@ -51,12 +56,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
           children: [
             Row(
               children: [
-                Text('$number', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                Text('$number',
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w800)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     recommendation.s.name,
-                    style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                        fontSize: 21, fontWeight: FontWeight.w800),
                   ),
                 ),
                 Text(
@@ -91,7 +99,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => DetailPage(recommendation.s)),
+                      MaterialPageRoute(
+                          builder: (_) => DetailPage(recommendation.s)),
                     ),
                     child: const Text('Learn More'),
                   ),
@@ -123,7 +132,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     return Shell(
       actions: [
-        menu('Filter', ['All matches', '50% and up', '70% and up'], (index) => min = [0, 50, 70][index]),
+        menu('Filter', ['All matches', '50% and up', '70% and up'],
+            (index) => min = [0, 50, 70][index]),
         const SizedBox(width: 12),
         menu('Sort', ['Best match', 'A to Z'], (index) => az = index == 1),
       ],
@@ -132,10 +142,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Your Specialty\nRecommendations',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, height: 1.1, color: ink),
+                  style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                      color: ink),
                 ),
               ),
               OutlinedButton(
@@ -159,7 +173,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
               children: [
                 Icon(
                   urgent ? Icons.warning_amber_rounded : Icons.check_circle,
-                  color: urgent ? const Color(0xFFD33B3B) : const Color(0xFF2E9A5B),
+                  color: urgent
+                      ? const Color(0xFFD33B3B)
+                      : const Color(0xFF2E9A5B),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -168,11 +184,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       children: [
                         const TextSpan(
                           text: 'Urgent Assessment Check: ',
-                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 16),
                         ),
                         TextSpan(
                           text: urgent ? 'ATTENTION\n' : 'OK\n',
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 16),
                         ),
                         TextSpan(
                           text: urgent
@@ -195,7 +213,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ),
             ),
           for (var i = 0; i < recommendations.length; i++)
-            specialtyCard(context, i + 1, recommendations[i], i == 0 && !az && min == 0),
+            specialtyCard(
+                context, i + 1, recommendations[i], i == 0 && !az && min == 0),
           const SizedBox(height: 8),
           const Text(disclaimer, style: TextStyle(fontSize: 12.5)),
         ],

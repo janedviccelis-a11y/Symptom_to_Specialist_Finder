@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:symptomm/models/hospital.dart';
+import 'package:symptomm/widgets/common.dart';
 
 class HospitalMapPage extends StatelessWidget {
   final List<Hospital> hospitals;
@@ -45,9 +46,9 @@ class HospitalMapPage extends StatelessWidget {
         ),
     ];
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Nearby hospitals')),
-      body: Column(
+    return Shell(
+      title: 'Nearby hospitals',
+      child: Column(
         children: [
           Expanded(
             child: FlutterMap(
@@ -73,8 +74,21 @@ class HospitalMapPage extends StatelessWidget {
             ),
           ),
           Container(
-            constraints: const BoxConstraints(maxHeight: 260),
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+            constraints: const BoxConstraints(maxHeight: 280),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            decoration: BoxDecoration(
+              color: canvas,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode
+                      ? Colors.black.withValues(alpha: .28)
+                      : const Color(0xFFC9D5E3),
+                  blurRadius: 14,
+                  offset: Offset(0, -5),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

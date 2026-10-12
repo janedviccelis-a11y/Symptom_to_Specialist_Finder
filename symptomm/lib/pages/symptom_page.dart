@@ -75,34 +75,29 @@ class _SymptomPageState extends State<SymptomPage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: TextField(
-              controller: controller,
-              onChanged: (_) => setState(() {}),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: 'Search symptoms',
-                hintStyle: const TextStyle(color: Color(0xFF788A91)),
-                prefixIcon: const Icon(Icons.search_rounded, color: blue),
-                suffixIcon: controller.text.isEmpty
-                    ? null
-                    : IconButton(
-                        tooltip: 'Clear search',
-                        onPressed: () {
-                          controller.clear();
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: Color(0xFFE0E9EA)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: blue, width: 1.5),
+            child: Container(
+              decoration: insetSurface(),
+              child: TextField(
+                controller: controller,
+                onChanged: (_) => setState(() {}),
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Search symptoms',
+                  prefixIcon: const Icon(Icons.search_rounded, color: blue),
+                  suffixIcon: controller.text.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: 'Clear search',
+                          onPressed: () {
+                            controller.clear();
+                            setState(() {});
+                          },
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                 ),
               ),
             ),
@@ -119,7 +114,7 @@ class _SymptomPageState extends State<SymptomPage> {
                         width: 30,
                         height: 30,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2F0ED),
+                          color: canvas,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
@@ -129,19 +124,19 @@ class _SymptomPageState extends State<SymptomPage> {
                         ),
                       ),
                       const SizedBox(width: 9),
-                      const Text(
+                      Text(
                         'MEDIORA  /  SYMPTOM CHECK',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.1,
-                          color: Color(0xFF71838A),
+                          color: mutedInk,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Text(
+                Text(
                   'Where does it hurt?',
                   style: TextStyle(
                     fontSize: 22,
@@ -151,12 +146,12 @@ class _SymptomPageState extends State<SymptomPage> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Tap a part of the body to explore related symptoms.',
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.4,
-                    color: Color(0xFF60747D),
+                    color: mutedInk,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -169,11 +164,7 @@ class _SymptomPageState extends State<SymptomPage> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: const Color(0xFFE4ECEC)),
-                  ),
+                  decoration: card(radius: 16),
                   child: Row(
                     children: [
                       Container(
@@ -188,7 +179,7 @@ class _SymptomPageState extends State<SymptomPage> {
                       Expanded(
                         child: Text(
                           area,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: ink,
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
@@ -197,8 +188,8 @@ class _SymptomPageState extends State<SymptomPage> {
                       ),
                       Text(
                         '${areaResults.length} symptoms',
-                        style: const TextStyle(
-                          color: Color(0xFF71838A),
+                        style: TextStyle(
+                          color: mutedInk,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -208,7 +199,7 @@ class _SymptomPageState extends State<SymptomPage> {
                 ),
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Related symptoms',
                         style: TextStyle(
@@ -220,9 +211,9 @@ class _SymptomPageState extends State<SymptomPage> {
                     ),
                     Text(
                       '${areaResults.length} available',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFF71838A),
+                        color: mutedInk,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -230,10 +221,10 @@ class _SymptomPageState extends State<SymptomPage> {
                 ),
                 const SizedBox(height: 9),
                 Material(
-                  color: Colors.white,
+                  color: canvas,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
-                    side: const BorderSide(color: Color(0xFFE0E9EA)),
+                    side: const BorderSide(color: Color(0xFFD7E1EC)),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: areaResults.isEmpty
@@ -243,7 +234,7 @@ class _SymptomPageState extends State<SymptomPage> {
                             query.isEmpty
                                 ? 'No symptoms are available for this area.'
                                 : 'No matching symptoms here. Try another search or choose a different area.',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Color(0xFF60747D),
                               height: 1.4,
                             ),
@@ -258,11 +249,11 @@ class _SymptomPageState extends State<SymptomPage> {
                                 children: [
                                   symptomTile(areaResults[index]),
                                   if (index < areaResults.length - 1)
-                                    const Divider(
+                                    Divider(
                                       height: 1,
                                       indent: 68,
                                       endIndent: 14,
-                                      color: Color(0xFFF0F3F3),
+                                      color: outlineTone,
                                     ),
                                 ],
                               ),
@@ -274,9 +265,17 @@ class _SymptomPageState extends State<SymptomPage> {
           ),
           Container(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Color(0xFFE5ECEC))),
+            decoration: BoxDecoration(
+              color: canvas,
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode
+                      ? Colors.black.withValues(alpha: .28)
+                      : const Color(0xFFC9D5E3),
+                  blurRadius: 12,
+                  offset: Offset(0, -4),
+                ),
+              ],
             ),
             child: Column(
               children: [

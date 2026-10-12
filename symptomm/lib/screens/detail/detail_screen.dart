@@ -11,7 +11,7 @@ class DetailScreen extends StatelessWidget {
         padding: const EdgeInsets.only(top: 18, bottom: 6),
         child: Text(
           title,
-          style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: ink),
+          style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: ink),
         ),
       );
 

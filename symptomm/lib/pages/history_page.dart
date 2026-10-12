@@ -97,21 +97,30 @@ class _HistoryPageState extends State<HistoryPage> {
                         padding: const EdgeInsets.all(16),
                         children: [
                           for (final entry in history)
-                            Card(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              color: Colors.white.withValues(alpha: .92),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: const BorderSide(
-                                  color: Color(0xFFB9D7DC),
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: card(radius: 20),
+                              child: Material(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(20),
+                                child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
                                 ),
-                              ),
-                              child: ListTile(
+                                leading: Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: insetSurface(radius: 14),
+                                  child: const Icon(
+                                    Icons.history_rounded,
+                                    color: blue,
+                                  ),
+                                ),
                                 title: Text(
                                   (entry['s'] as List).join(', '),
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                                 subtitle: Text(
@@ -119,7 +128,10 @@ class _HistoryPageState extends State<HistoryPage> {
                                       .substring(0, 16)
                                       .replaceFirst('T', '  '),
                                 ),
-                                trailing: const Icon(Icons.chevron_right),
+                                trailing: Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: mutedInk,
+                                ),
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -128,6 +140,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                       save: false,
                                     ),
                                   ),
+                                ),
                                 ),
                               ),
                             ),

@@ -45,8 +45,11 @@ class _DetailPageState extends State<DetailPage> {
         padding: const EdgeInsets.only(top: 18, bottom: 6),
         child: Text(
           title,
-          style: const TextStyle(
-              fontSize: 21, fontWeight: FontWeight.w800, color: ink),
+          style: TextStyle(
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+            color: ink,
+          ),
         ),
       );
 
@@ -69,18 +72,16 @@ class _DetailPageState extends State<DetailPage> {
         padding: const EdgeInsets.all(16),
         children: [
           Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: const LinearGradient(colors: [blue, teal]),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 34,
-                  backgroundColor: Colors.white,
-                  child: Icon(specialty.icon, size: 34, color: blue),
-                ),
+          padding: const EdgeInsets.all(18),
+          decoration: card(radius: 22),
+          child: Row(
+            children: [
+              Container(
+                width: 62,
+                height: 62,
+                decoration: insetSurface(radius: 20),
+                child: Icon(specialty.icon, size: 31, color: blue),
+              ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -89,17 +90,16 @@ class _DetailPageState extends State<DetailPage> {
                     children: [
                       Text(
                         specialty.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 19,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 5),
                       Text(
                         specialty.brief,
-                        style:
-                            const TextStyle(color: Colors.white, height: 1.3),
+                        style: TextStyle(color: mutedInk, height: 1.4),
                       ),
                     ],
                   ),
@@ -137,8 +137,11 @@ class _DetailPageState extends State<DetailPage> {
                 ? 'Finding nearby hospitals...'
                 : 'Find nearest hospitals'),
             style: FilledButton.styleFrom(
-              backgroundColor: blue,
+              backgroundColor: teal,
               minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
           ),
           const SizedBox(height: 6),

@@ -59,7 +59,7 @@ class _ResultsPageState extends State<ResultsPage> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F2F1),
+                    color: subtleSurface,
                     borderRadius: BorderRadius.circular(13),
                   ),
                   child: Icon(recommendation.s.icon, color: teal, size: 26),
@@ -94,13 +94,17 @@ class _ResultsPageState extends State<ResultsPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F4EC),
+                    color: isDarkMode
+                        ? const Color(0xFF29483F)
+                        : const Color(0xFFE8F4EC),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '${recommendation.pct}% relevance',
-                    style: const TextStyle(
-                      color: Color(0xFF28734A),
+                    style: TextStyle(
+                      color: isDarkMode
+                          ? const Color(0xFF9AD7B2)
+                          : const Color(0xFF28734A),
                       fontWeight: FontWeight.w800,
                       fontSize: 14,
                     ),
@@ -114,7 +118,7 @@ class _ResultsPageState extends State<ResultsPage> {
               child: LinearProgressIndicator(
                 value: recommendation.pct / 100,
                 minHeight: 6,
-                backgroundColor: const Color(0xFFE6ECEB),
+                backgroundColor: outlineTone,
                 color: top ? teal : blue,
                 semanticsLabel: 'Match strength',
                 semanticsValue: '${recommendation.pct}',
@@ -123,7 +127,7 @@ class _ResultsPageState extends State<ResultsPage> {
             const SizedBox(height: 11),
             Text(
               recommendation.s.brief,
-              style: const TextStyle(color: Color(0xFF42535D), height: 1.35),
+              style: TextStyle(color: mutedInk, height: 1.35),
             ),
             if (recommendation.because.isNotEmpty) ...[
               const SizedBox(height: 10),
@@ -136,9 +140,9 @@ class _ResultsPageState extends State<ResultsPage> {
                       label: Text(symptom),
                       visualDensity: VisualDensity.compact,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor: const Color(0xFFF0F5F5),
+                      backgroundColor: subtleSurface,
                       side: BorderSide.none,
-                      labelStyle: const TextStyle(
+                      labelStyle: TextStyle(
                         color: ink,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -149,7 +153,7 @@ class _ResultsPageState extends State<ResultsPage> {
                       label: Text('+${recommendation.because.length - 2}'),
                       visualDensity: VisualDensity.compact,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor: const Color(0xFFF0F5F5),
+                      backgroundColor: subtleSurface,
                       side: BorderSide.none,
                     ),
                 ],
@@ -159,7 +163,7 @@ class _ResultsPageState extends State<ResultsPage> {
               const SizedBox(height: 4),
               Text(
                 'ICD-10 symptom codes: ${recommendation.icd10Codes.join(', ')}',
-                style: const TextStyle(fontSize: 11, color: Color(0xFF53636B)),
+                style: TextStyle(fontSize: 11, color: mutedInk),
               ),
             ],
             const SizedBox(height: 12),
@@ -208,7 +212,7 @@ class _ResultsPageState extends State<ResultsPage> {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Your matches',
                   style: TextStyle(
@@ -226,7 +230,7 @@ class _ResultsPageState extends State<ResultsPage> {
                 ),
                 icon: const Icon(Icons.history),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: panel,
                   foregroundColor: blue,
                 ),
               ),
@@ -236,14 +240,20 @@ class _ResultsPageState extends State<ResultsPage> {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               'Based on ${widget.picked.length} selected symptom${widget.picked.length == 1 ? '' : 's'}',
-              style: const TextStyle(color: Color(0xFF53636B)),
+              style: TextStyle(color: mutedInk),
             ),
           ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
             decoration: BoxDecoration(
-              color: urgent ? const Color(0xFFFFE9E6) : const Color(0xFFE8F4EC),
+              color: urgent
+                  ? (isDarkMode
+                      ? const Color(0xFF452D34)
+                      : const Color(0xFFFFE9E6))
+                  : (isDarkMode
+                      ? const Color(0xFF29483F)
+                      : const Color(0xFFE8F4EC)),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(

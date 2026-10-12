@@ -1,15 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:symptomm/app_state.dart';
 
-const blue = Color(0xFF2F6AA3), teal = Color(0xFF4FA58F), ink = Color(0xFF12202B);
+const blue = Color(0xFF327FB2);
+const teal = Color(0xFF32ACCC);
+bool get isDarkMode => darkMode.value;
+Color get ink => isDarkMode ? const Color(0xFFEAF2F8) : const Color(0xFF23384E);
+Color get canvas =>
+    isDarkMode ? const Color(0xFF182633) : const Color(0xFFEAF1F8);
+Color get panel =>
+    isDarkMode ? const Color(0xFF223544) : const Color(0xFFFFFFFF);
+Color get subtleSurface =>
+    isDarkMode ? const Color(0xFF2B4050) : const Color(0xFFF0F5F5);
+Color get mutedInk =>
+    isDarkMode ? const Color(0xFFA7BBCB) : const Color(0xFF637B91);
+Color get outlineTone =>
+    isDarkMode ? const Color(0xFF3B5264) : const Color(0xFFDCE5EF);
 
-BoxDecoration card({Color? color, Color? border}) => BoxDecoration(
-  color: color ?? Colors.white.withValues(alpha: .92),
-  borderRadius: BorderRadius.circular(14),
-  border: Border.all(
-    color: border ?? const Color(0xFFB9D7DC),
-    width: border == null ? 1 : 2,
-  ),
-);
+BoxDecoration card({Color? color, Color? border, double radius = 22}) =>
+    BoxDecoration(
+      color: color ?? panel,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: border ?? outlineTone,
+        width: border == null ? 1 : 2,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: isDarkMode
+              ? Colors.black.withValues(alpha: .22)
+              : const Color(0xFFFFFFFF),
+          offset: const Offset(-5, -5),
+          blurRadius: 12,
+        ),
+        BoxShadow(
+          color: isDarkMode
+              ? Colors.black.withValues(alpha: .28)
+              : const Color(0xFFC9D5E3),
+          offset: const Offset(5, 5),
+          blurRadius: 12,
+        ),
+      ],
+    );
+
+BoxDecoration insetSurface({double radius = 18}) => BoxDecoration(
+      color: isDarkMode ? const Color(0xFF1C2D3B) : canvas,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: outlineTone),
+      boxShadow: [
+        BoxShadow(
+          color: isDarkMode
+              ? Colors.black.withValues(alpha: .3)
+              : const Color(0xFFC9D5E3),
+          offset: const Offset(3, 3),
+          blurRadius: 7,
+        ),
+        BoxShadow(
+          color: isDarkMode ? const Color(0xFF2B4050) : const Color(0xFFFFFFFF),
+          offset: const Offset(-3, -3),
+          blurRadius: 7,
+        ),
+      ],
+    );
 
 class Shell extends StatelessWidget {
   final String? title;
@@ -27,47 +78,88 @@ class Shell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        backgroundColor: canvas,
         floatingActionButton: floatingActionButton,
-        body: Container(
-          decoration: const BoxDecoration(
+        body: DecoratedBox(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFCDEBEE), Color(0xFFF3FAFB)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDarkMode
+                  ? [const Color(0xFF182633), const Color(0xFF1D2D3B)]
+                  : [const Color(0xFFEAF1F8), const Color(0xFFF1F6FB)],
             ),
           ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    if (Navigator.canPop(context))
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () => Navigator.pop(context),
-                      )
-                    else
-                      const SizedBox(width: 16),
-                    if (title != null)
-                      Expanded(
-                        child: Text(
-                          title!,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: ink,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 60),
+                  child: Column(
+                    children: [
+                      if (title != null || actions.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+                          child: Container(
+                            height: 46,
+                            padding: const EdgeInsets.symmetric(horizontal: 7),
+                            decoration: card(radius: 18),
+                            child: Row(
+                              children: [
+                                if (title != null)
+                                  Expanded(
+                                    child: Text(
+                                      title!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
+                                        color: ink,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  const Spacer(),
+                                ...actions,
+                                const SizedBox(width: 4),
+                              ],
+                            ),
                           ),
                         ),
-                      )
-                    else
-                      const Spacer(),
-                    ...actions,
-                    const SizedBox(width: 8),
-                  ],
+                      Expanded(child: child),
+                    ],
+                  ),
                 ),
-                Expanded(child: child),
-              ],
-            ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 8 + MediaQuery.paddingOf(context).bottom,
+                height: 44,
+                child: Center(
+                  child: Material(
+                    color: panel,
+                    borderRadius: BorderRadius.circular(16),
+                    child: IconButton(
+                      tooltip: 'Home',
+                      onPressed: () => Navigator.of(context)
+                          .popUntil((route) => route.isFirst),
+                      icon: const Icon(Icons.home_rounded),
+                      color: blue,
+                      style: IconButton.styleFrom(
+                        backgroundColor: panel,
+                        minimumSize: const Size(52, 44),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -86,21 +178,37 @@ class GBtn extends StatelessWidget {
           color: Colors.transparent,
           child: Ink(
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [blue, teal]),
-              borderRadius: BorderRadius.circular(28),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF35B8D8), Color(0xFF2D9FC4)],
+              ),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFFB9D3E3),
+                  offset: Offset(4, 5),
+                  blurRadius: 10,
+                ),
+                BoxShadow(
+                  color: Color(0xFFFFFFFF),
+                  offset: Offset(-3, -3),
+                  blurRadius: 8,
+                ),
+              ],
             ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(18),
               onTap: onTap,
               child: Container(
-                height: 52,
+                height: 54,
                 alignment: Alignment.center,
                 child: Text(
                   label,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -117,19 +225,39 @@ const emergency =
 
 Widget emergencyBox() => Container(
       margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFBDDDD),
-        borderRadius: BorderRadius.circular(10),
+        color: isDarkMode ? const Color(0xFF452D34) : const Color(0xFFFFE8E8),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDarkMode ? const Color(0xFF69414A) : const Color(0xFFF6C9CC),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withValues(alpha: .2)
+                : const Color(0xFFFFFFFF),
+            offset: const Offset(-3, -3),
+            blurRadius: 8,
+          ),
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withValues(alpha: .25)
+                : const Color(0xFFE7CBD0),
+            offset: const Offset(3, 3),
+            blurRadius: 8,
+          ),
+        ],
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, color: Color(0xFFD33B3B), size: 30),
-          SizedBox(width: 10),
+          const Icon(Icons.warning_amber_rounded,
+              color: Color(0xFFCC4650), size: 27),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               emergency,
-              style: TextStyle(fontSize: 12.5, color: ink),
+              style: TextStyle(fontSize: 12, color: ink, height: 1.4),
             ),
           ),
         ],
@@ -137,4 +265,5 @@ Widget emergencyBox() => Container(
     );
 
 void snack(BuildContext context, String message) =>
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
