@@ -3,6 +3,18 @@
 Mediora provides general guidance on which medical specialties may be relevant
 to selected symptoms. It is not a diagnostic tool.
 
+## Run in Microsoft Edge
+
+From this directory, run:
+
+```powershell
+flutter run -d edge
+```
+
+To search for nearby hospitals, allow location access when Microsoft Edge
+prompts. Browser location requires a secure context; `localhost` is supported
+for local development.
+
 ## 3D anatomy viewer
 
 The symptom page renders the Human Atlas BodyParts3D model directly in Mediora's

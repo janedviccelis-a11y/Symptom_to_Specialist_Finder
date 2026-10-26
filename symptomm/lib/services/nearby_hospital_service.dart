@@ -53,29 +53,33 @@ Future<HospitalSearchResults> _findNearbyHospitals() async {
       );
     }
 
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.denied) {
-      throw const HospitalLookupException(
-        'Location permission is needed to find the nearest hospitals.',
-      );
-    }
-    if (permission == LocationPermission.deniedForever) {
-      throw const HospitalLookupException(
-        'Location access is blocked. Allow it in your device settings, then try again.',
-      );
+    if (!kIsWeb) {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied) {
+        throw const HospitalLookupException(
+          'Location permission is needed to find the nearest hospitals.',
+        );
+      }
+      if (permission == LocationPermission.deniedForever) {
+        throw const HospitalLookupException(
+          'Location access is blocked. Allow it in your device settings, then try again.',
+        );
+      }
     }
 
     Position? cachedPosition;
-    try {
-      cachedPosition = await Geolocator.getLastKnownPosition();
-    } on PlatformException catch (error) {
-      debugPrint(
-          'Cached location unavailable: ${error.code}: ${error.message}');
-    } on MissingPluginException catch (error) {
-      debugPrint('Cached location unavailable: $error');
+    if (!kIsWeb) {
+      try {
+        cachedPosition = await Geolocator.getLastKnownPosition();
+      } on PlatformException catch (error) {
+        debugPrint(
+            'Cached location unavailable: ${error.code}: ${error.message}');
+      } on MissingPluginException catch (error) {
+        debugPrint('Cached location unavailable: $error');
+      }
     }
     if (cachedPosition != null && _isUsableCachedPosition(cachedPosition)) {
       position = cachedPosition;
@@ -133,13 +137,12 @@ Future<HospitalSearchResults> _findNearbyHospitals() async {
   final maxLatitude = (position.latitude + latitudeDelta).clamp(-90, 90);
   final uri = Uri.parse(_nominatimEndpoint).replace(
     queryParameters: {
-      'amenity': '[hospital]',
+      'q': '[hospital]',
       'viewbox': '$minLongitude,$maxLatitude,$maxLongitude,$minLatitude',
       'bounded': '1',
       'format': 'jsonv2',
-      'limit': '40',
+      'limit': '20',
       'addressdetails': '1',
-      'namedetails': '1',
     },
   );
 
