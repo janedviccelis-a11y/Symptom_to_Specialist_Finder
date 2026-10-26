@@ -3,44 +3,60 @@ import 'package:latlong2/latlong.dart';
 import 'package:symptomm/services/nearby_hospital_service.dart';
 
 void main() {
-  test('hospital results are parsed and ordered by actual coordinates', () {
+  test('Nominatim hospital results are sorted and restricted to 15 km', () {
     const origin = LatLng(14, 121);
     const response = '''
-      {
-        "elements": [
-          {
-            "type": "node",
-            "id": 2,
-            "lat": 14.01,
-            "lon": 121,
-            "tags": {"amenity": "hospital", "name": "Far Hospital"}
-          },
-          {
-            "type": "way",
-            "id": 1,
-            "center": {"lat": 14.001, "lon": 121},
-            "tags": {
-              "amenity": "hospital",
-              "name": "Near Hospital",
-              "addr:street": "Main Road",
-              "addr:city": "Town"
-            }
-          }
-        ]
-      }
+      [
+        {
+          "osm_type": "node",
+          "osm_id": 2,
+          "lat": "14.05",
+          "lon": "121",
+          "name": "Far Hospital"
+        },
+        {
+          "osm_type": "way",
+          "osm_id": 1,
+          "lat": "14.001",
+          "lon": "121",
+          "name": "Near Hospital",
+          "address": {"road": "Main Road", "city": "Town"}
+        },
+        {
+          "osm_type": "node",
+          "osm_id": 3,
+          "lat": "14.2",
+          "lon": "121",
+          "name": "Outside Search Radius"
+        }
+      ]
     ''';
 
-    final hospitals = parseNearbyHospitals(response, origin);
+    final hospitals = parseNominatimHospitals(response, origin);
 
     expect(hospitals.map((hospital) => hospital.name),
         ['Near Hospital', 'Far Hospital']);
     expect(hospitals.first.address, 'Main Road, Town');
-    expect(hospitals.first.distanceMeters, lessThan(hospitals.last.distanceMeters));
+    expect(hospitals.first.distanceMeters,
+        lessThan(hospitals.last.distanceMeters));
   });
 
-  test('malformed hospital directory responses are rejected', () {
+  test('malformed Nominatim responses are rejected', () {
     expect(
-      () => parseNearbyHospitals('{"unexpected": []}', const LatLng(0, 0)),
+      () => parseNominatimHospitals(
+        '{"unexpected": []}',
+        const LatLng(0, 0),
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test('Nominatim errors are not treated as empty results', () {
+    expect(
+      () => parseNominatimHospitals(
+        '{"error": "Unable to geocode"}',
+        const LatLng(0, 0),
+      ),
       throwsFormatException,
     );
   });

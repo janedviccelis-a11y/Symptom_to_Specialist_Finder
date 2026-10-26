@@ -1,13 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:symptomm/models/hospital.dart';
 
 const _searchRadiusMeters = 15000;
-const _overpassEndpoint = 'https://overpass-api.de/api/interpreter';
+const _nominatimEndpoint = 'https://nominatim.openstreetmap.org/search';
+const _cachedLocationMaxAge = Duration(minutes: 2);
+const _cachedLocationMaxAccuracyMeters = 100.0;
+const _lookupTimeout = Duration(seconds: 30);
+const _directoryRequestTimeout = Duration(seconds: 12);
 
 class HospitalLookupException implements Exception {
   final String message;
@@ -28,36 +35,60 @@ class HospitalSearchResults {
   });
 }
 
-Future<HospitalSearchResults> findNearbyHospitals() async {
-  if (!await Geolocator.isLocationServiceEnabled()) {
-    throw const HospitalLookupException(
-      'Turn on location services to find hospitals near you.',
-    );
-  }
+Future<HospitalSearchResults> findNearbyHospitals() {
+  return _findNearbyHospitals().timeout(
+    _lookupTimeout,
+    onTimeout: () => throw const HospitalLookupException(
+      'Finding nearby hospitals took too long. Check your location and internet connection, then try again.',
+    ),
+  );
+}
 
-  var permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-  }
-  if (permission == LocationPermission.denied) {
-    throw const HospitalLookupException(
-      'Location permission is needed to find the nearest hospitals.',
-    );
-  }
-  if (permission == LocationPermission.deniedForever) {
-    throw const HospitalLookupException(
-      'Location access is blocked. Allow it in your device settings, then try again.',
-    );
-  }
-
+Future<HospitalSearchResults> _findNearbyHospitals() async {
   Position position;
   try {
-    position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 20),
-      ),
-    );
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      throw const HospitalLookupException(
+        'Turn on location services to find hospitals near you.',
+      );
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied) {
+      throw const HospitalLookupException(
+        'Location permission is needed to find the nearest hospitals.',
+      );
+    }
+    if (permission == LocationPermission.deniedForever) {
+      throw const HospitalLookupException(
+        'Location access is blocked. Allow it in your device settings, then try again.',
+      );
+    }
+
+    Position? cachedPosition;
+    try {
+      cachedPosition = await Geolocator.getLastKnownPosition();
+    } on PlatformException catch (error) {
+      debugPrint(
+          'Cached location unavailable: ${error.code}: ${error.message}');
+    } on MissingPluginException catch (error) {
+      debugPrint('Cached location unavailable: $error');
+    }
+    if (cachedPosition != null && _isUsableCachedPosition(cachedPosition)) {
+      position = cachedPosition;
+    } else {
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+    }
+  } on HospitalLookupException {
+    rethrow;
   } on LocationServiceDisabledException {
     throw const HospitalLookupException(
       'Turn on location services to find hospitals near you.',
@@ -70,31 +101,67 @@ Future<HospitalSearchResults> findNearbyHospitals() async {
     throw const HospitalLookupException(
       'Your location could not be determined in time. Check your signal and try again.',
     );
+  } on PlatformException catch (error) {
+    throw HospitalLookupException(
+      'Could not access your device location (${error.code}). Check location permission and try again.',
+    );
+  } on MissingPluginException {
+    throw const HospitalLookupException(
+      'Location services are unavailable in this app build. Rebuild the app and try again.',
+    );
+  }
+
+  if (!position.latitude.isFinite ||
+      !position.longitude.isFinite ||
+      position.latitude < -90 ||
+      position.latitude > 90 ||
+      position.longitude < -180 ||
+      position.longitude > 180) {
+    throw const HospitalLookupException(
+      'Your device returned an invalid location. Check location services and try again.',
+    );
   }
 
   final location = LatLng(position.latitude, position.longitude);
-  final query = '''
-[out:json][timeout:25];
-(
-  node["amenity"="hospital"](around:$_searchRadiusMeters,${location.latitude},${location.longitude});
-  way["amenity"="hospital"](around:$_searchRadiusMeters,${location.latitude},${location.longitude});
-  relation["amenity"="hospital"](around:$_searchRadiusMeters,${location.latitude},${location.longitude});
-  node["healthcare"="hospital"](around:$_searchRadiusMeters,${location.latitude},${location.longitude});
-  way["healthcare"="hospital"](around:$_searchRadiusMeters,${location.latitude},${location.longitude});
-  relation["healthcare"="hospital"](around:$_searchRadiusMeters,${location.latitude},${location.longitude});
-);
-out center tags;
-''';
+  const latitudeDelta = _searchRadiusMeters / 111320;
+  final cosineLatitude =
+      math.cos(position.latitude * math.pi / 180).abs().clamp(0.001, 1.0);
+  final longitudeDelta = latitudeDelta / cosineLatitude;
+  final minLongitude = (position.longitude - longitudeDelta).clamp(-180, 180);
+  final maxLongitude = (position.longitude + longitudeDelta).clamp(-180, 180);
+  final minLatitude = (position.latitude - latitudeDelta).clamp(-90, 90);
+  final maxLatitude = (position.latitude + latitudeDelta).clamp(-90, 90);
+  final uri = Uri.parse(_nominatimEndpoint).replace(
+    queryParameters: {
+      'amenity': '[hospital]',
+      'viewbox': '$minLongitude,$maxLatitude,$maxLongitude,$minLatitude',
+      'bounded': '1',
+      'format': 'jsonv2',
+      'limit': '40',
+      'addressdetails': '1',
+      'namedetails': '1',
+    },
+  );
 
-  final http.Response response;
   try {
-    response = await http
-        .post(
-          Uri.parse(_overpassEndpoint),
-          headers: const {'User-Agent': 'SymptomSpecialistFinder/1.0'},
-          body: {'data': query},
-        )
-        .timeout(const Duration(seconds: 35));
+    final response = await http.get(
+      uri,
+      headers: const {
+        'User-Agent': 'SymptomSpecialistFinder/1.0',
+        'Accept': 'application/json',
+      },
+    ).timeout(_directoryRequestTimeout);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw HospitalLookupException(
+        'The hospital directory is temporarily unavailable (HTTP ${response.statusCode}). Please try again later.',
+      );
+    }
+    return HospitalSearchResults(
+      userLocation: location,
+      hospitals: parseNominatimHospitals(response.body, location),
+    );
+  } on HospitalLookupException {
+    rethrow;
   } on http.ClientException {
     throw const HospitalLookupException(
       'Could not connect to the OpenStreetMap hospital directory. Check your internet connection.',
@@ -103,19 +170,6 @@ out center tags;
     throw const HospitalLookupException(
       'The hospital directory took too long to respond. Please try again.',
     );
-  }
-
-  if (response.statusCode < 200 || response.statusCode >= 300) {
-    throw HospitalLookupException(
-      'The hospital directory is temporarily unavailable (HTTP ${response.statusCode}). Please try again later.',
-    );
-  }
-
-  try {
-    return HospitalSearchResults(
-      userLocation: location,
-      hospitals: parseNearbyHospitals(response.body, location),
-    );
   } on FormatException {
     throw const HospitalLookupException(
       'The hospital directory returned an unreadable response. Please try again later.',
@@ -123,27 +177,28 @@ out center tags;
   }
 }
 
-List<Hospital> parseNearbyHospitals(String responseBody, LatLng origin) {
+bool _isUsableCachedPosition(Position position) {
+  final age = DateTime.now().difference(position.timestamp);
+  return age >= Duration.zero &&
+      age <= _cachedLocationMaxAge &&
+      position.accuracy <= _cachedLocationMaxAccuracyMeters;
+}
+
+List<Hospital> parseNominatimHospitals(String responseBody, LatLng origin) {
   final decoded = jsonDecode(responseBody);
-  if (decoded is! Map<String, dynamic> || decoded['elements'] is! List) {
-    throw const FormatException('Unexpected OpenStreetMap response');
+  if (decoded is! List) {
+    throw const FormatException('Unexpected Nominatim response');
   }
 
   final hospitals = <Hospital>[];
   final seenIds = <String>{};
   const distance = Distance();
 
-  for (final element in decoded['elements'] as List) {
-    if (element is! Map<String, dynamic>) continue;
-    final tags = element['tags'];
-    if (tags is! Map<String, dynamic>) continue;
+  for (final result in decoded) {
+    if (result is! Map<String, dynamic>) continue;
 
-    final center = element['center'];
-    final centerMap = center is Map ? center : null;
-    final lat =
-        _coordinate(element['lat']) ?? _coordinate(centerMap?['lat']);
-    final lon =
-        _coordinate(element['lon']) ?? _coordinate(centerMap?['lon']);
+    final lat = _coordinate(result['lat']);
+    final lon = _coordinate(result['lon']);
     if (lat == null ||
         lon == null ||
         lat < -90 ||
@@ -153,31 +208,56 @@ List<Hospital> parseNearbyHospitals(String responseBody, LatLng origin) {
       continue;
     }
 
-    final id = '${element['type']}/${element['id']}';
+    final point = LatLng(lat, lon);
+    final distanceMeters = distance.as(LengthUnit.Meter, origin, point);
+    if (distanceMeters > _searchRadiusMeters) continue;
+
+    final osmType = result['osm_type'];
+    final osmId = result['osm_id'];
+    final placeId = result['place_id'];
+    final id = osmType is String && osmId != null
+        ? '$osmType/$osmId'
+        : placeId != null
+            ? 'place/$placeId'
+            : 'coordinate/${point.latitude}/${point.longitude}';
     if (!seenIds.add(id)) continue;
 
-    final street = [
-      tags['addr:housenumber'],
-      tags['addr:street'],
-    ].whereType<String>().where((part) => part.isNotEmpty).join(' ');
-    final fullAddress = tags['addr:full'];
-    final city = tags['addr:city'] ?? tags['addr:town'] ?? tags['addr:suburb'];
+    final nameDetails = result['namedetails'];
+    final address = result['address'];
+    final displayName = result['display_name'];
+    final name = result['name'] ??
+        (nameDetails is Map ? nameDetails['name'] : null) ??
+        (displayName is String ? displayName.split(',').first : null);
     final addressParts = <String>[];
-    if (fullAddress is String && fullAddress.isNotEmpty) {
-      addressParts.add(fullAddress);
-    } else if (street.isNotEmpty) {
-      addressParts.add(street);
+    if (address is Map) {
+      for (final key in [
+        'house_number',
+        'road',
+        'suburb',
+        'city',
+        'town',
+        'village',
+        'postcode',
+      ]) {
+        final value = address[key];
+        if (value is String &&
+            value.isNotEmpty &&
+            !addressParts.contains(value)) {
+          addressParts.add(value);
+        }
+      }
     }
-    if (city is String && city.isNotEmpty) addressParts.add(city);
+    if (addressParts.isEmpty && displayName is String) {
+      addressParts.add(displayName);
+    }
 
-    final point = LatLng(lat, lon);
     hospitals.add(
       Hospital(
         id: id,
-        name: tags['name'] is String ? tags['name'] as String : 'Hospital',
+        name: name is String && name.isNotEmpty ? name : 'Hospital',
         address: addressParts.join(', '),
         location: point,
-        distanceMeters: distance.as(LengthUnit.Meter, origin, point),
+        distanceMeters: distanceMeters,
       ),
     );
   }
@@ -188,5 +268,6 @@ List<Hospital> parseNearbyHospitals(String responseBody, LatLng origin) {
 
 double? _coordinate(Object? value) {
   if (value is num && value.isFinite) return value.toDouble();
+  if (value is String) return double.tryParse(value);
   return null;
 }

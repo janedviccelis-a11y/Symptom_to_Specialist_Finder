@@ -17,12 +17,15 @@ class _DetailPageState extends State<DetailPage> {
   bool findingHospitals = false;
 
   Future<void> findHospitals() async {
+    if (findingHospitals) return;
     setState(() => findingHospitals = true);
     try {
       final results = await findNearbyHospitals();
       if (!mounted) return;
+      setState(() => findingHospitals = false);
       if (results.hospitals.isEmpty) {
-        snack(context, 'No mapped hospitals were found within 15 km of your location.');
+        snack(context,
+            'No mapped hospitals were found within 15 km of your location.');
         return;
       }
       await Navigator.push(
@@ -36,6 +39,14 @@ class _DetailPageState extends State<DetailPage> {
       );
     } on HospitalLookupException catch (error) {
       if (mounted) snack(context, error.message);
+    } catch (error, stackTrace) {
+      debugPrint('Nearby hospital search failed: $error\n$stackTrace');
+      if (mounted) {
+        snack(
+          context,
+          'Hospital search failed: $error',
+        );
+      }
     } finally {
       if (mounted) setState(() => findingHospitals = false);
     }
@@ -72,16 +83,16 @@ class _DetailPageState extends State<DetailPage> {
         padding: const EdgeInsets.all(16),
         children: [
           Container(
-          padding: const EdgeInsets.all(18),
-          decoration: card(radius: 22),
-          child: Row(
-            children: [
-              Container(
-                width: 62,
-                height: 62,
-                decoration: insetSurface(radius: 20),
-                child: Icon(specialty.icon, size: 31, color: blue),
-              ),
+            padding: const EdgeInsets.all(18),
+            decoration: card(radius: 22),
+            child: Row(
+              children: [
+                Container(
+                  width: 62,
+                  height: 62,
+                  decoration: insetSurface(radius: 20),
+                  child: Icon(specialty.icon, size: 31, color: blue),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -117,7 +128,7 @@ class _DetailPageState extends State<DetailPage> {
           bulletList(specialty.tests),
           heading('Find a hospital near you'),
           const Text(
-            'Use your current device location to search OpenStreetMap for hospitals within 15 km. Your coordinates are sent to the OpenStreetMap Overpass service for this search.',
+            'Use your current device location to search OpenStreetMap for hospitals within 15 km. Your coordinates are sent to the OpenStreetMap Nominatim service for this search.',
             style: TextStyle(fontSize: 14, height: 1.45),
           ),
           const SizedBox(height: 10),
