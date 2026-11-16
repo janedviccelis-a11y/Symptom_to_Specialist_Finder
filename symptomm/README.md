@@ -80,13 +80,17 @@ The app never stores passwords in the profile table.
    confirmation messages cannot be delivered.
 4. Open **Project Settings → API** and copy the **Project URL** and the
    **publishable/anon key**. Do not use or ship the `service_role` key in the
-   app.
+   app. Use the root project URL only, such as
+   `https://your-project.supabase.co`; do not append `/rest/v1/` or `/auth/v1/`.
 5. From the project directory, start the app with both values:
 
    ```powershell
-   flutter run -d edge --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co --dart-define=SUPABASE_ANON_KEY=YOUR_PUBLISHABLE_OR_ANON_KEY
+   flutter run -d edge `
+     "--dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co" `
+     "--dart-define=SUPABASE_ANON_KEY=YOUR_PUBLISHABLE_OR_ANON_KEY"
    ```
 
+   Replace both placeholder values with the values from your Supabase project.
    Use the same Dart defines for other Flutter targets. With no keys configured,
    the app still opens and **Continue as a guest** remains available; account
    actions display a setup message.

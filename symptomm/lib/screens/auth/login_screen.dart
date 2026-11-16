@@ -29,7 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!AuthService.isConfigured) {
       _showMessage(
-        'Account login is not configured yet. Follow the Supabase setup in README.md.',
+        AuthService.configurationError ??
+            'Account login is not configured yet. Follow the Supabase setup in README.md.',
       );
       return;
     }

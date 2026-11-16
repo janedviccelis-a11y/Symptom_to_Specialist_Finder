@@ -2,8 +2,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
   static bool _isConfigured = false;
+  static String? _configurationError;
 
   static bool get isConfigured => _isConfigured;
+  static String? get configurationError => _configurationError;
 
   static bool get hasSignedInSession =>
       _isConfigured && Supabase.instance.client.auth.currentSession != null;
@@ -61,13 +63,26 @@ Future<void> initializeSupabaseIfConfigured() async {
 
   if (supabaseUrl.isEmpty && supabasePublishableKey.isEmpty) return;
   if (supabaseUrl.isEmpty || supabasePublishableKey.isEmpty) {
-    throw StateError(
-      'Set both SUPABASE_URL and SUPABASE_ANON_KEY to enable account login.',
-    );
+    AuthService._configurationError =
+        'Set both SUPABASE_URL and SUPABASE_ANON_KEY to enable account login.';
+    return;
+  }
+
+  final projectUri = Uri.tryParse(supabaseUrl);
+  if (projectUri == null ||
+      (projectUri.scheme != 'https' && projectUri.scheme != 'http') ||
+      projectUri.host.isEmpty ||
+      (projectUri.path.isNotEmpty && projectUri.path != '/') ||
+      projectUri.hasQuery ||
+      projectUri.hasFragment) {
+    AuthService._configurationError =
+        'SUPABASE_URL must be the project URL only, for example '
+        'https://your-project.supabase.co. Do not include /rest/v1 or /auth/v1.';
+    return;
   }
 
   await Supabase.initialize(
-    url: supabaseUrl,
+    url: supabaseUrl.replaceFirst(RegExp(r'/+$'), ''),
     publishableKey: supabasePublishableKey,
   );
   AuthService._isConfigured = true;

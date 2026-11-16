@@ -55,7 +55,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
     if (!AuthService.isConfigured) {
       _showMessage(
-        'Account creation is not configured yet. Follow the Supabase setup in README.md.',
+        AuthService.configurationError ??
+            'Account creation is not configured yet. Follow the Supabase setup in README.md.',
       );
       return;
     }
