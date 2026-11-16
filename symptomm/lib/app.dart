@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:symptomm/app_state.dart';
 import 'package:symptomm/screens/home/home_screen.dart';
+import 'package:symptomm/screens/auth/login_screen.dart';
+import 'package:symptomm/services/auth_service.dart';
 import 'package:symptomm/widgets/common.dart';
 
 class MyApp extends StatefulWidget {
@@ -143,7 +145,9 @@ class _MyAppState extends State<MyApp> {
                   .copyWith(textScaler: TextScaler.linear(scale)),
               child: child!,
             ),
-            home: const HomeScreen(),
+            home: AuthService.hasSignedInSession
+                ? const HomeScreen()
+                : const LoginScreen(),
           ),
         ),
       );

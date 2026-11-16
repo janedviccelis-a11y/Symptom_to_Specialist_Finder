@@ -78,14 +78,14 @@ class HospitalMapPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
             decoration: BoxDecoration(
               color: canvas,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(top: const Radius.circular(24)),
               boxShadow: [
                 BoxShadow(
                   color: isDarkMode
                       ? Colors.black.withValues(alpha: .28)
                       : const Color(0xFFC9D5E3),
                   blurRadius: 14,
-                  offset: Offset(0, -5),
+                  offset: const Offset(0, -5),
                 ),
               ],
             ),

@@ -234,8 +234,8 @@ class _SymptomPageState extends State<SymptomPage> {
                             query.isEmpty
                                 ? 'No symptoms are available for this area.'
                                 : 'No matching symptoms here. Try another search or choose a different area.',
-                            style: TextStyle(
-                              color: Color(0xFF60747D),
+                            style: const TextStyle(
+                              color: const Color(0xFF60747D),
                               height: 1.4,
                             ),
                           ),
@@ -273,7 +273,7 @@ class _SymptomPageState extends State<SymptomPage> {
                       ? Colors.black.withValues(alpha: .28)
                       : const Color(0xFFC9D5E3),
                   blurRadius: 12,
-                  offset: Offset(0, -4),
+                  offset: const Offset(0, -4),
                 ),
               ],
             ),

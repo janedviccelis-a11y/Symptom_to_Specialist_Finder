@@ -5,6 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:symptomm/app_state.dart';
 import 'package:symptomm/main.dart';
 
+Future<void> openAsGuest(WidgetTester tester) async {
+  await tester.pumpWidget(const MyApp());
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Continue as a guest'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({'dark_mode': false});
@@ -13,8 +20,7 @@ void main() {
 
   testWidgets('app loads and opens the symptom flow',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await openAsGuest(tester);
 
     expect(find.text('MEDIORA'), findsOneWidget);
     expect(find.text('Start New Symptom Search'), findsOneWidget);
@@ -32,8 +38,7 @@ void main() {
 
   testWidgets('about page is opened from the home icon',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await openAsGuest(tester);
     await tester.tap(find.byTooltip('About Mediora'));
     await tester.pumpAndSettle();
 
@@ -44,8 +49,7 @@ void main() {
   testWidgets('home shows the app logo and toggles the color theme',
       (WidgetTester tester) async {
     darkMode.value = false;
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await openAsGuest(tester);
 
     final logo = tester.widget<Image>(find.byType(Image).first);
     expect(
@@ -64,8 +68,7 @@ void main() {
 
   testWidgets('home control returns to the first page without a back header',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await openAsGuest(tester);
     await tester.tap(find.text('Start New Symptom Search'));
     await tester.pumpAndSettle();
 
@@ -80,8 +83,7 @@ void main() {
 
   testWidgets('selected body area filters the symptom list',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await openAsGuest(tester);
     await tester.tap(find.text('Start New Symptom Search'));
     await tester.pumpAndSettle();
     expect(find.text('Where does it hurt?'), findsOneWidget);
@@ -116,8 +118,7 @@ void main() {
 
   testWidgets('selecting a body area shows matching symptoms',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await openAsGuest(tester);
     await tester.tap(find.text('Start New Symptom Search'));
     await tester.pumpAndSettle();
 
