@@ -85,11 +85,13 @@ The app never stores passwords in the profile table.
 3. Open **Authentication → Providers → Email** and disable email
    confirmations. Since the app does not collect an actual email address,
    confirmation messages cannot be delivered.
-4. Open **Project Settings → API** and copy the **Project URL** and the
-   **publishable/anon key**. Do not use or ship the `service_role` key in the
-   app. Use the root project URL only, such as
-   `https://your-project.supabase.co`; do not append `/rest/v1/` or `/auth/v1/`.
-5. From the project directory, start the app with both values:
+4. The app is configured by default to use the Mediora Supabase project. Its
+   project URL and client-safe publishable key are bundled for mobile and other
+   Flutter targets, so no `--dart-define` values are needed to run the app.
+   Never use or ship a `service_role` key in the app.
+5. To build against a different Supabase project, open **Project Settings →
+   API**, copy its **Project URL** and **publishable/anon key**, then override
+   the defaults when starting the app:
 
    ```powershell
    flutter run -d edge `
@@ -97,10 +99,8 @@ The app never stores passwords in the profile table.
      "--dart-define=SUPABASE_ANON_KEY=YOUR_PUBLISHABLE_OR_ANON_KEY"
    ```
 
-   Replace both placeholder values with the values from your Supabase project.
-   Use the same Dart defines for other Flutter targets. With no keys configured,
-   the app still opens and **Continue as a guest** remains available; account
-   actions display a setup message.
+   Replace both placeholder values with the values from that project. Use the
+   same Dart defines for other Flutter targets when overriding the defaults.
 6. If you already ran the earlier version of this setup without an update
    policy, run this once in the SQL Editor:
 

@@ -96,8 +96,14 @@ class AuthService {
 }
 
 Future<void> initializeSupabaseIfConfigured() async {
-  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  const supabasePublishableKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  const supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://ogonbbmuojjbfdwhzbvv.supabase.co',
+  );
+  const supabasePublishableKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'sb_publishable_v0MYGTvbjEz15YXyNqkrEQ_SHoZDLst',
+  );
 
   if (supabaseUrl.isEmpty && supabasePublishableKey.isEmpty) return;
   if (supabaseUrl.isEmpty || supabasePublishableKey.isEmpty) {
