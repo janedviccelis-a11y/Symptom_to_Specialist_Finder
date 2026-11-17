@@ -10,6 +10,13 @@ class AuthService {
   static bool get hasSignedInSession =>
       _isConfigured && Supabase.instance.client.auth.currentSession != null;
 
+  static String? get currentUsername {
+    if (!_isConfigured) return null;
+    final user = Supabase.instance.client.auth.currentUser;
+    final username = user?.userMetadata?['username'];
+    return username is String && username.isNotEmpty ? username : null;
+  }
+
   static SupabaseClient get _client {
     if (!_isConfigured) {
       throw StateError(
@@ -55,6 +62,37 @@ class AuthService {
       },
     );
   }
+
+  static Future<Map<String, dynamic>> getProfile() async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw StateError('Sign in to view your profile.');
+
+    final profile = await _client
+        .from('profiles')
+        .select('first_name, surname, birthday, address, username')
+        .eq('id', user.id)
+        .single();
+    return Map<String, dynamic>.from(profile);
+  }
+
+  static Future<void> updateProfile({
+    required String firstName,
+    required String surname,
+    required DateTime birthday,
+    required String address,
+  }) async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw StateError('Sign in to update your profile.');
+
+    await _client.from('profiles').update({
+      'first_name': firstName.trim(),
+      'surname': surname.trim(),
+      'birthday': birthday.toIso8601String().substring(0, 10),
+      'address': address.trim(),
+    }).eq('id', user.id);
+  }
+
+  static Future<void> signOut() => _client.auth.signOut();
 }
 
 Future<void> initializeSupabaseIfConfigured() async {

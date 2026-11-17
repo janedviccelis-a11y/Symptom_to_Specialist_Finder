@@ -24,6 +24,21 @@ void main() {
     expect(find.text('Start New Symptom Search'), findsOneWidget);
   });
 
+  testWidgets('home profile action opens a guest profile prompt',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue as a guest'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Profile'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Guest profile'), findsOneWidget);
+    expect(find.text('Log in to view and update your account details.'),
+        findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('registration shows Not match until passwords are equal',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());

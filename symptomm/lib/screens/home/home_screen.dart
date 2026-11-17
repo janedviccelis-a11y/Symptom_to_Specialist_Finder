@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:symptomm/app_state.dart';
 import 'package:symptomm/pages/about_page.dart';
 import 'package:symptomm/pages/symptom_page.dart';
+import 'package:symptomm/screens/profile/profile_screen.dart';
+import 'package:symptomm/services/auth_service.dart';
 import 'package:symptomm/widgets/common.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -72,6 +74,17 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const Spacer(),
                       IconButton(
+                        tooltip: 'Profile',
+                        onPressed: () => go(context, const ProfileScreen()),
+                        style: IconButton.styleFrom(
+                          foregroundColor: blue,
+                          backgroundColor: panel,
+                          minimumSize: const Size(44, 44),
+                        ),
+                        icon: const Icon(Icons.account_circle_outlined),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
                         tooltip: isDarkMode
                             ? 'Switch to light mode'
                             : 'Switch to dark mode',
@@ -108,9 +121,18 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 22),
                       Text(
-                        'Your next step\nto better care.',
+                        'Welcome, ${AuthService.currentUsername ?? 'Guest'}',
                         style: TextStyle(
-                          fontSize: 34,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: ink,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your next step to better care.',
+                        style: TextStyle(
+                          fontSize: 30,
                           fontWeight: FontWeight.w900,
                           height: 1.06,
                           color: ink,

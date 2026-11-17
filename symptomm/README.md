@@ -48,6 +48,13 @@ The app never stores passwords in the profile table.
      to authenticated
      using ((select auth.uid()) = id);
 
+   create policy "Users can update their own profile"
+     on public.profiles
+     for update
+     to authenticated
+     using ((select auth.uid()) = id)
+     with check ((select auth.uid()) = id);
+
    create function public.create_profile_for_new_user()
    returns trigger
    language plpgsql
@@ -94,9 +101,28 @@ The app never stores passwords in the profile table.
    Use the same Dart defines for other Flutter targets. With no keys configured,
    the app still opens and **Continue as a guest** remains available; account
    actions display a setup message.
-6. Create an account in the app, then log in with the username and password.
+6. If you already ran the earlier version of this setup without an update
+   policy, run this once in the SQL Editor:
+
+   ```sql
+   create policy "Users can update their own profile"
+     on public.profiles
+     for update
+     to authenticated
+     using ((select auth.uid()) = id)
+     with check ((select auth.uid()) = id);
+   ```
+
+7. Create an account in the app, then log in with the username and password.
    The trigger creates a profile row from signup metadata. Row-level security
-   lets a signed-in user read only their own profile.
+   lets a signed-in user read and update only their own profile. The username
+   is read-only because it is also the Supabase Auth login identity.
+
+The Supabase URL and key are supplied to Flutter at app launch. You only need
+to include them when building or starting the app; do not paste them into the
+app's source files. A running app keeps the values it was launched with, while
+starting a new Flutter run/build requires the values again unless you configure
+them in your IDE launch settings.
 
 Names, birthday, and address are personal information. Only collect and retain
 the fields your app needs, and review applicable privacy requirements before
