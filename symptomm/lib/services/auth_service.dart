@@ -67,11 +67,49 @@ class AuthService {
     final user = _client.auth.currentUser;
     if (user == null) throw StateError('Sign in to view your profile.');
 
-    final profile = await _client
+    final query = _client
         .from('profiles')
         .select('first_name, surname, birthday, address, username')
-        .eq('id', user.id)
-        .single();
+        .eq('id', user.id);
+    final profile = await query.maybeSingle();
+    if (profile == null) {
+      final metadata = user.userMetadata ?? const <String, dynamic>{};
+      final firstName = metadata['first_name'];
+      final surname = metadata['surname'];
+      final birthday = metadata['birthday'];
+      final address = metadata['address'];
+      final username = metadata['username'];
+      if (firstName is! String ||
+          firstName.trim().isEmpty ||
+          surname is! String ||
+          surname.trim().isEmpty ||
+          birthday is! String ||
+          DateTime.tryParse(birthday) == null ||
+          address is! String ||
+          address.trim().isEmpty ||
+          username is! String ||
+          username.trim().isEmpty) {
+        throw StateError(
+          'Your profile is missing and cannot be restored from your account '
+          'details. Please contact support.',
+        );
+      }
+
+      return Map<String, dynamic>.from(
+        await _client
+            .from('profiles')
+            .upsert({
+              'id': user.id,
+              'first_name': firstName.trim(),
+              'surname': surname.trim(),
+              'birthday': birthday,
+              'address': address.trim(),
+              'username': normalizedUsername(username),
+            }, onConflict: 'id')
+            .select('first_name, surname, birthday, address, username')
+            .single(),
+      );
+    }
     return Map<String, dynamic>.from(profile);
   }
 

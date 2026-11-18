@@ -55,6 +55,12 @@ The app never stores passwords in the profile table.
      using ((select auth.uid()) = id)
      with check ((select auth.uid()) = id);
 
+   create policy "Users can create their own profile"
+     on public.profiles
+     for insert
+     to authenticated
+     with check ((select auth.uid()) = id);
+
    create function public.create_profile_for_new_user()
    returns trigger
    language plpgsql
@@ -102,7 +108,9 @@ The app never stores passwords in the profile table.
    Replace both placeholder values with the values from that project. Use the
    same Dart defines for other Flutter targets when overriding the defaults.
 6. If you already ran the earlier version of this setup without an update
-   policy, run this once in the SQL Editor:
+   policy, run this once in the SQL Editor. The insert policy also allows the
+   app to restore a missing profile from the signed-in account's signup
+   details:
 
    ```sql
    create policy "Users can update their own profile"
@@ -111,12 +119,18 @@ The app never stores passwords in the profile table.
      to authenticated
      using ((select auth.uid()) = id)
      with check ((select auth.uid()) = id);
+
+   create policy "Users can create their own profile"
+     on public.profiles
+     for insert
+     to authenticated
+     with check ((select auth.uid()) = id);
    ```
 
 7. Create an account in the app, then log in with the username and password.
    The trigger creates a profile row from signup metadata. Row-level security
-   lets a signed-in user read and update only their own profile. The username
-   is read-only because it is also the Supabase Auth login identity.
+   lets a signed-in user read, create, and update only their own profile. The
+   username is read-only because it is also the Supabase Auth login identity.
 
 The Supabase URL and key are supplied to Flutter at app launch. You only need
 to include them when building or starting the app; do not paste them into the
